@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 '''
-Name: nxapi_bfd_neighbor_info_sid.py
-Author: Allen Robel 
-Email: arobel@cisco.com
-Description: print show bfd neighbors detail information using NXAPI
-
+Name: bfd_neighbor_info.py
+Description: NXAPI: display bfd neighbors detail information.
 '''
 our_version = 106
-script_name = 'nxapi_bfd_neighbor_info_sid'
+script_name = 'bfd_neighbor_info'
 
 # standard libraries
 import argparse
@@ -26,7 +23,7 @@ ex_ipv6 = ' Example: --ipv6'
 help_ipv6 = 'If present, show ipv6 bgp neighbor state, else show ipv4 bgp neighbor state.'
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='DESCRIPTION: print bfd neighbors detail information using NXAPI.', parents=[ArgsCookie, ArgsNxapiTools])
+    parser = argparse.ArgumentParser(description='DESCRIPTION: NXAPI: display bfd neighbors detail information.', parents=[ArgsCookie, ArgsNxapiTools])
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
 

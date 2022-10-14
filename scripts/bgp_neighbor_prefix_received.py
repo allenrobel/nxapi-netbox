@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-# python/nxapi/nxapi_bgp_neighbor_prefix_received.py
-our_version = 106
+'''
+Name: bgp_neighbor_prefix_received.py
+Description: NXAPI: display bgp neighbor summary info
+'''
+our_version = 107
 script_name = 'bgp_neighbor_prefix_received'
 # standard libraries
 import argparse

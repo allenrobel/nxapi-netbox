@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
-Name: nxapi_bgp_neighbor_state_sid.py
-Description: NXAPI: display bgp neighbor state
+Name: bgp_neighbor_state.py
+Description: NXAPI: display bgp neighbor state for all neighbors
 
 Synopsis:
 
@@ -34,7 +34,9 @@ def get_parser():
     ex_ipv6 = ' Example: --ipv6'
     help_ipv6 = 'If present, show ipv6 bgp neighbor state, else show ipv4 bgp neighbor state.'
 
-    parser = argparse.ArgumentParser(description='DESCRIPTION: NXAPI: display bgp neighbor state.', parents=[ArgsCookie,ArgsNxapiTools])
+    parser = argparse.ArgumentParser(
+        description='DESCRIPTION: NXAPI: display bgp neighbor state for all neighbors.',
+        parents=[ArgsCookie,ArgsNxapiTools])
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
 

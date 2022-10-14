@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 our_version = 107
 '''
-Name: nxapi_interface_beacon_status_sid.py
-Author: Allen Robel 
-Email: arobel@cisco.com
-Description: display interface beacon status using NXAPI
+Name: interface_beacon_status.py
+Description: NXAPI: display interface beacon status
 
-
-Synopsis:
+Example usage:
 
 ./interface_beacon_status.py --vault hashicorp --devices leaf_1,leaf_2 [--interface Eth1/1] [--on]
 
@@ -40,7 +37,7 @@ ex_on = 'Example: --on'
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: display interface beacon status using NXAPI.',
+        description='DESCRIPTION: NXAPI: display interface beacon status.',
         parents=[ArgsCookie, ArgsNxapiTools])
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')

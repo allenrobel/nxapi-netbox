@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
-Name: nxapi_bfd_neighbor_state_sid.py
-Description: print bfd neighbor state, via NXAPI, for all neighbors on --sid
+Name: bfd_neighbor_state.py
+Description: display bfd neighbor state for all neighbors
 
 Example:
 
@@ -25,7 +25,7 @@ from vault.vault import get_vault
 from nxapi.nxapi_bfd import NxapiBfdNeighbors
 
 def get_parser():
-    title = 'print bfd neighbor state, via NXAPI, for all neighbors on --device'
+    title = 'display bfd neighbor state for all neighbors on --device'
     parser = argparse.ArgumentParser(description='DESCRIPTION: {}'.format(title), parents=[ArgsCookie, ArgsNxapiTools])
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')

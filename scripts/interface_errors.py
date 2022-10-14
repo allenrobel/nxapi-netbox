@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Name: interface_errors.py
-Summary: display non-zero interface errors for a set of NXOS switches via NXAPI
+Summary: NXAPI: display non-zero interface error counters
 
 Synopsis:
 
@@ -24,7 +24,7 @@ from nxapi.nxapi_interface import NxapiInterfaceAll
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: display non-zero interface errors for a set of NXOS switches via NXAPI',
+        description='DESCRIPTION: NXAPI: display non-zero interface error counters',
         parents=[ArgsCookie, ArgsNxapiTools])
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')

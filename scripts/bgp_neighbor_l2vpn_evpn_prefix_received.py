@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Name: bgp_neighbor_l2vpn_evpn_prefix_received.py
-Description: 
+Description: NXAPI: display bgp l2vpn evpn summary info
 '''
 our_version = 102
 script_name = 'bgp_neighbor_l2vpn_evpn_prefix_received'
@@ -23,7 +23,7 @@ def get_parser():
     ex_prefix = 'Example: '
     ex_nonzero = '{} --nonzero'.format(ex_prefix)
 
-    parser = argparse.ArgumentParser(description='DESCRIPTION: display bgp l2vpn evpn summary info via NXAPI', parents=[ArgsCookie, ArgsNxapiTools])
+    parser = argparse.ArgumentParser(description='DESCRIPTION: NXAPI: display bgp l2vpn evpn summary info', parents=[ArgsCookie, ArgsNxapiTools])
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
 

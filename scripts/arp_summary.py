@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Name: arp_summary.py
-Summary: Display ip arp summary via NXAPI 
+Description: NXAPI: display ip arp summary 
 Dependencies: See README.md in this directory
 '''
 our_version = 100
@@ -20,7 +20,7 @@ from vault.vault import get_vault
 from nxapi.nxapi_arp import NxapiArpSummary
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='DESCRIPTION: display ip arp summary via NXAPI', parents=[ArgsCookie, ArgsNxapiTools])
+    parser = argparse.ArgumentParser(description='DESCRIPTION: NXAPI: display ip arp summary', parents=[ArgsCookie, ArgsNxapiTools])
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
 

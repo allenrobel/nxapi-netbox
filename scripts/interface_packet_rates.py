@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 '''
-Name: nxapi_interface_packet_rates.py
-Author: Allen Robel (arobel@cisco.com)
-Summary: monitor interface input/output packet rates for a set of interfaces
-Description:
-   For help with options: ./nxapi_interface_packet_rates --help
+Name: interface_packet_rates.py
+Description: NXAPI: display interface input/output packet rates for a set of interfaces
 
-Synopsis:
+Example usage:
 
 ./nxapi_interface_packet_rates.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2 --interfaces Eth1/1,Eth1/2
 

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-
+'''
+Name: inventory.py
+Description: NXAPI: display "show inventory" info
+'''
 script_name = 'inventory'
 our_version = 100
 # standard libraries
@@ -17,7 +20,7 @@ from nxapi.nxapi_inventory import NxapiInventory
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: NXAPI: display inventory info',
+        description='DESCRIPTION: NXAPI: display "show inventory" info',
         parents=[ArgsCookie, ArgsNxapiTools])
     default   = parser.add_argument_group(title='OPTIONAL SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')

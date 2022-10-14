@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Name: interface_info.py
-Description: NXAPI: print show interface information
+Description: NXAPI: display info from "show interface" cli
 
 Synopsis:
 
@@ -28,7 +28,7 @@ def get_parser():
     ex_interface = 'Example: --interface Eth1/1'
 
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: print show interface information using NXAPI.',
+        description='DESCRIPTION: NXAPI: display info from "show interface" cli.',
         parents=[ArgsCookie, ArgsNxapiTools])
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')

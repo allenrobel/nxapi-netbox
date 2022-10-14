@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
-Name: bgp_neighbors_format_table.py
-Description: display bgp neighbor information in a tabular format using nxapi
+Name: bgp_neighbors.py
+Description: NXAPI: display detailed bgp neighbor information
 
 Synopsis:
 
@@ -27,7 +27,7 @@ from nxapi.nxapi_bgp_neighbors import NxapiBgpNeighborsIpv4
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: NXAPI: display bgp neighbor information in a tabular format.',
+        description='DESCRIPTION: NXAPI: display detailed bgp neighbor information.',
         parents=[ArgsCookie,ArgsNxapiTools])
     optional   = parser.add_argument_group(title='OPTIONAL SCRIPT ARGS')
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
