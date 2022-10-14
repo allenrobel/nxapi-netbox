@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 103
+our_version = 104
 '''
 Name: forwarding_consistency.py
 Description: NXAPI: start and display results for forwarding consistency checker
@@ -20,13 +20,13 @@ from vault.vault import get_vault
 from nxapi.nxapi_show import NxapiShow
 from nxapi.nxapi_config import NxapiConfig
 
-help_ipv6 = 'If present, test ipv6 forwarding consistency in addition to ipv4'
-help_time = 'Duration of inconsistency test, in seconds.  For larger prefix scales, you may need to increase this.'
-ex_prefix = 'Example: '
-ex_ipv6 = '{} --ipv6'.format(ex_prefix)
-ex_time = '{} --time 20'.format(ex_prefix)
 
 def get_parser():
+    help_ipv6 = 'If present, test ipv6 forwarding consistency in addition to ipv4'
+    help_time = 'Duration of inconsistency test, in seconds.  For larger prefix scales, you may need to increase this.'
+    ex_prefix = 'Example: '
+    ex_ipv6 = '{} --ipv6'.format(ex_prefix)
+    ex_time = '{} --time 20'.format(ex_prefix)
     title = 'NXAPI: start and display results for forwarding consistency checker'
     parser = argparse.ArgumentParser(
         description='DESCRIPTION: {}'.format(title),
