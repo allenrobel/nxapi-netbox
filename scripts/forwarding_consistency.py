@@ -22,12 +22,12 @@ from nxapi.nxapi_config import NxapiConfig
 
 
 def get_parser():
-    help_ipv6 = 'If present, test ipv6 forwarding consistency in addition to ipv4'
+    help_ipv6 = 'If present, test ipv6 forwarding consistency in addition to ipv4.'
     help_time = 'Duration of inconsistency test, in seconds.  For larger prefix scales, you may need to increase this.'
-    ex_prefix = 'Example: '
+    ex_prefix = ' Example: '
     ex_ipv6 = '{} --ipv6'.format(ex_prefix)
     ex_time = '{} --time 20'.format(ex_prefix)
-    title = 'NXAPI: start and display results for forwarding consistency checker'
+    title = 'NXAPI: start and display results for forwarding consistency checker.'
     parser = argparse.ArgumentParser(
         description='DESCRIPTION: {}'.format(title),
         parents=[ArgsCookie,ArgsNxapiTools])
