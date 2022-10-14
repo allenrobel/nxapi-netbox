@@ -7,7 +7,7 @@ Description: NXAPI: Classes containing methods for retrieving ipv4/ipv6 unicast 
 Synopsis:
 
 from nxapi.nxapi_forwarding_route_multicast import NxapiForwardingRouteMulticastIpv4
-from log import get_logger
+from general.log import get_logger
 
 def print_dict(d, hostname):
     width = get_max_width(d)
