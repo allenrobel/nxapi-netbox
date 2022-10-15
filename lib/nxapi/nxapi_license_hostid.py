@@ -88,7 +88,7 @@ class NxapiLicenseHostid(NxapiBase):
     @property
     def host_id_raw(self):
         '''
-        return the raw hostid e.g. VDH=FDO2321135M
+        return the raw hostid we.g. VDH=FDO2321135M
         '''
         try:
             return self.info['host_id_raw']
