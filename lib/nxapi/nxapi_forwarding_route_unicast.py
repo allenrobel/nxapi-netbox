@@ -3,7 +3,7 @@ our_version = 108
 '''
 Name: nxapi_forwarding_route_unicast.py
 Author: Allen Robel (arobel@cisco.com)
-Description: NXAPI: Classes containing methods for retrieving ipv4/ipv6 unicast fib information 
+Description: NXAPI: Classes containing methods for retrieving ipv4 unicast fib information 
 
 Synopsis:
 
@@ -92,7 +92,7 @@ class NxapiForwardingRouteUnicastIpv4(NxapiForwardingRouteUnicast):
     self._prefix_info contains the information below in ROW_prefix associated with self.module, self.vrf, self.prefix
     self._path_info contains the information below from ROW_path
 
-    ts_101# sh forwarding ip route 10.10.10.2/32 detail vrf default module 1 | json-pretty 
+    switch# sh forwarding ip route 10.10.10.2/32 detail vrf default module 1 | json-pretty 
     {
         "TABLE_module": {
             "ROW_module": {
@@ -122,7 +122,7 @@ class NxapiForwardingRouteUnicastIpv4(NxapiForwardingRouteUnicast):
             }
         }
     }
-    ts_101# 
+    switch# 
     '''
     def __init__(self, username, password, mgmt_ip, _log):
         super().__init__(username, password, mgmt_ip, _log)
@@ -270,11 +270,11 @@ class NxapiForwardingRouteUnicastIpv4(NxapiForwardingRouteUnicast):
     def prefix(self):
         return self._prefix
     @prefix.setter
-    def prefix(self,_x):
-        if not self.verify.is_ipv4_network(_x):
-            self.log.error('Exiting. prefix must be a valid ipv4 prefix in a.b.c.d/e format.  Got {}'.format(_x))
+    def prefix(self, x):
+        if not self.verify.is_ipv4_address_with_prefix(x):
+            self.log.error('Exiting. prefix must be a valid ipv4 prefix in a.b.c.d/e format.  Got {}'.format(x))
             exit(1)
-        self._prefix = _x
+        self._prefix = x
 
     @property
     def prefix_info(self):
