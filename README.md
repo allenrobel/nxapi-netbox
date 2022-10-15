@@ -107,7 +107,7 @@ vault secrets enable kv
 vault secrets list
 ```
 
-The vault endpoint (``/v1/kv/nxapi`` by default) should be populated as follows:
+The vault endpoint (``/v1/kv/nxapi`` by default) should be populated as follows. Note the endpoint is specified differently when using the vault cli, versus using in a REST call e.g. REST ``/v1/kv/nxapi`` becomes CLI ``kv/nxapi``.
 
 ```bash
 vault kv put kv/nxapi nxos_username=admin nxos_password=mypassword netbox_token=21716fi7k4ac9a8a51d99c5fab025e207b741fe netbox_url=http://mynetbox.foo.com
@@ -133,7 +133,7 @@ nb = netbox(vault)
 
 ##### Verify the expected key/values are present in Hashicorp Vault
 
-Change your endpoint below, if it's not ``kv/nxapi``.  Also note the endpoint is specified differently when using the vault cli e.g. ``/v1/kv/nxapi`` becomes ``kv/nxapi``.
+Change your endpoint below, if it's not ``kv/nxapi``.
 
 
 ```bash
