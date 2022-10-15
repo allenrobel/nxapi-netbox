@@ -84,7 +84,7 @@ VAULT_TOKEN=hvs.SiVa7BDO92FfETBLdQuMxSCq
 
 #### 3. HashiCorp Vault
 
-A cheat-sheet is available in this repo at ``HashiCorp_Vault_Cheat_Sheet.md``
+A HashiCorp Vault installation/setup cheat-sheet is available in this repo at [HashiCorp_Vault_Cheat_Sheet.md](https://github.com/allenrobel/nxapi-netbox/blob/main/HashiCorp_Vault_Cheat_Sheet.md)
 
 Below are general steps which assume you already have a vault up and running.
 
@@ -93,7 +93,7 @@ If using ``--vault hashicorp``, a running unsealed HashiCorp Vault with endpoint
 
 ##### To install HashiCorp Vault
 
-(Install HashiCorp Vault)[https://learn.hashicorp.com/tutorials/vault/getting-started-install]
+[Install HashiCorp Vault](https://learn.hashicorp.com/tutorials/vault/getting-started-install)
 
 ##### To create the vault endpoint
 
@@ -107,7 +107,7 @@ vault secrets enable kv
 vault secrets list
 ```
 
-The vault endpoint ('/v1/kv/nxapi' by default) should be populated as follows:
+The vault endpoint (``v1/kv/nxapi`` by default) should be populated as follows:
 
 ```bash
 vault kv put kv/nxapi nxos_username=admin nxos_password=mypassword netbox_token=21716fi7k4ac9a8a51d99c5fab025e207b741fe netbox_url=http://mynetbox.foo.com
@@ -122,11 +122,11 @@ nxos_username=<nxos username>
 nxos_password=<nxos password>
 ```
 
-If using an endpoint other than ``kv/nxapi``, you'll need to modify the scripts to set the new endpoint.  Like this:
+If using an endpoint other than ``v1/kv/nxapi``, you'll need to modify the scripts to set the new endpoint.  Like this:
 
 ```python
 vault = get_vault(cfg.vault)
-vault.endpoint = 'kv/my_new_endpoint' # <<<< add this line
+vault.endpoint = 'v1/kv/my_new_endpoint' # <<<< add this line
 vault.fetch_data()
 nb = netbox(vault)
 ```
