@@ -39,7 +39,6 @@ import argparse
 from threading import Thread, Lock
 from tty import CFLAG
 
-#DSSPERF libraries
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools

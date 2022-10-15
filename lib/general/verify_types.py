@@ -32,8 +32,8 @@ class VerifyTypes(Constants):
         self.lib_name = "VerifyTypes"
         self.log = log
         self.DEFAULT_LOGLEVEL = 'INFO'
-        self.ipv4_mask_range = range(0,33)
-        self.ipv6_mask_range = range(0,129)
+        self.ipv4_mask_range = range(0, self.ipv4_mask_length + 1)
+        self.ipv6_mask_range = range(0, self.ipv6_mask_length + 1)
         self.re_digits = re.compile('^(\d+)$')
         self.re_mac_address = re.compile(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2}$)', re.I)
 
