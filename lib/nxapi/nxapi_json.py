@@ -373,10 +373,10 @@ class Nxapi(object):
         headers={'content-type':'application/{}'.format(self.payload_type)}
         try:
             self.log.debug('POST with self.cookies {}'.format(self.cookies))
-            if self.verify.is_ipv6_address(self.dut):
-                self.url = 'https://[{}]:{}/ins'.format(self.dut, self.https_server_port)
-            else:
+            if self.verify.is_ipv4_address(self.dut):
                 self.url = 'https://{}:{}/ins'.format(self.dut, self.https_server_port)
+            else:
+                self.url = 'https://[{}]:{}/ins'.format(self.dut, self.https_server_port)
 
             self.response = self.session.post(
                                                 self.url,
