@@ -77,7 +77,8 @@ class VerifyTypes(Constants):
                 return True
             else:
                 return False
-        except:
+        except Exception as e:
+            self.log.error('Got exception: {}'.format(e))
             return False
 
     def is_ipv4_address_with_prefix(self,x):
@@ -85,12 +86,13 @@ class VerifyTypes(Constants):
         verify x is an ipv4 address with prefix of the form X.X.X.X/Y
         '''
         try:
-            _ = ipaddress.IPv4Address(x)
-            if isinstance(_, ipaddress.ip_address):
+            _ = ipaddress.IPv4Interface(x)
+            if isinstance(_, ipaddress.IPv4Interface):
                 return True
             else:
                 return False
-        except:
+        except Exception as e:
+            self.log.error('Got exception: {}'.format(e))
             return False
 
     def is_ipv4_network(self,x):
@@ -100,7 +102,8 @@ class VerifyTypes(Constants):
                 return True
             else:
                 return False
-        except:
+        except Exception as e:
+            self.log.error('Got exception: {}'.format(e))
             return False
 
     def is_ipv4_mask(self,x):
@@ -145,7 +148,8 @@ class VerifyTypes(Constants):
                 return True
             else:
                 return False
-        except:
+        except Exception as e:
+            self.log.error('Got exception: {}'.format(e))
             return False
 
     def is_ipv6_mask(self,x):
@@ -170,7 +174,8 @@ class VerifyTypes(Constants):
                 return True
             else:
                 return False
-        except:
+        except Exception as e:
+            self.log.error('Got exception: {}'.format(e))
             return False
 
     def is_ipv6_link_local_address(self, x):
@@ -244,7 +249,6 @@ class VerifyTypes(Constants):
                 self.log.error("One or more elements of list are not integers: {}".format(x))
                 return False
         return True
-
 
     def is_mac_address(self, x):
         '''verify x is a mac address'''
