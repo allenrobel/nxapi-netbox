@@ -4,14 +4,33 @@ our_version = 106
 Name: forwarding_route_ipv4.py
 Description: NXAPI: Display ipv4 prefix information from FIB related to --module --vrf --prefix 
 
-Synopsis:
+Example usage
 
-./forwarding_route_ipv4.py --vault hashicorp --devices cvd_leaf_1 --module 2 --prefix 10.239.0.24/32
-hostname oz-201v6 prefix 10.239.0.24/32 num_paths 4
+Query an ipv4 prefix in an RFC5549 environment.
+
+% ./forwarding_route_ipv4.py --vault hashicorp --devices cvd_leaf_1 --module 2 --prefix 10.239.0.24/32
+hostname leaf_1 prefix 10.239.0.24/32 num_paths 4
   next_hop 2112:232::20     -> Ethernet1/3         
   next_hop 2112:232::22     -> Ethernet1/4         
   next_hop 2112:232::24     -> Ethernet2/3         
   next_hop 2112:232::26     -> Ethernet2/4         
+%
+
+Tracing a prefix across multiple devices.
+
+% ./forwarding_route_ipv4.py --vault hashicorp --devices cvd_leaf_1,cvd_spine_1,cvd_leaf_3 --module 1 --prefix 10.2.0.3/32
+hostname cvd-1311-leaf prefix 10.2.0.3/32 num_paths 4
+  next_hop 10.4.0.2         -> Ethernet1/49        
+  next_hop 10.4.0.18        -> Ethernet1/50        
+  next_hop 10.4.0.46        -> Ethernet1/51        
+  next_hop 10.4.0.50        -> Ethernet1/52        
+hostname cvd-1211-spine prefix 10.2.0.3/32 num_paths 2
+  next_hop 10.4.0.9         -> Ethernet1/3         
+  next_hop 10.4.0.25        -> Ethernet2/3         
+hostname cvd-1313-leaf prefix 10.2.0.3/32 num_paths 1
+  next_hop Receive          -> sup-eth1            
+%
+
 '''
 script_name = 'forwarding_route_ipv4'
 
