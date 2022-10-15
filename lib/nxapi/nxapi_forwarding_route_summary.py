@@ -6,7 +6,7 @@ Description: Classes containing methods for retrieving FIB ipv4/ipv6 unicast rou
 
 Synopsis:
 
-from util.log import get_logger
+from general.log import get_logger
 from nxapi.nxapi_forwarding_route_summary import NxapiForwardingRouteSummaryIpv4, NxapiForwardingRouteSummaryIpv6
 
 username = 'admin'
