@@ -15,6 +15,8 @@ Script                                       | Description
 [bgp_neighbors]                              | NXAPI: display detailed bgp neighbor information
 [forwarding_consistency]                     | NXAPI: start and display results for forwarding consistency checker
 [forwarding_route_ipv4]                      | NXAPI: Display ipv4 prefix information from FIB related to --module --vrf --prefix
+[forwarding_route_summary_ipv4]              | NXAPI: display forwarding ipv4 route summary
+[forwarding_route_summary_ipv6]              | NXAPI: display forwarding ipv6 route summary
 [interface_beacon_status]                    | NXAPI: display interface beacon status
 [interface_errors]                           | NXAPI: display non-zero interface error counters
 [interface_info]                             | NXAPI: display info from "show interface" cli
@@ -196,6 +198,8 @@ netbox_url: http://mynetbox.foo.com'
 [bgp_neighbors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_neighbors.py
 [forwarding_consistency]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/forwarding_consistency.py
 [forwarding_route_ipv4]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/forwarding_route_ipv4.py
+[forwarding_route_summary_ipv4]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/forwarding_route_summary_ipv4.py
+[forwarding_route_summary_ipv6]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/forwarding_route_summary_ipv6.py
 [interface_beacon_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_beacon_status.py
 [interface_errors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_errors.py
 [interface_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_info.py
