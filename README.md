@@ -24,6 +24,7 @@ Script                                       | Description
 [interface_packet_rates]                     | NXAPI: display interface input/output packet rates for a set of interfaces
 [inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
 [inventory]                                  | NXAPI: display "show inventory" info
+[license_hostid]                             | NXAPI: display license host_id for one or more NX-OS switches
 [switch_find_files]                          | NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices
 [switch_reload]                              | NXAPI: reload (or install reset) one or more NX-OS devices
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
@@ -207,6 +208,7 @@ netbox_url: http://mynetbox.foo.com'
 [interface_packet_rates]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_packet_rates.py
 [inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
 [inventory]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory.py
+[license_hostid]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/license_hostid.py
 [switch_find_files]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_find_files.py
 [switch_reload]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reload.py
 [test_vault_ansible]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_ansible.py
