@@ -34,6 +34,7 @@ Script                                       | Description
 [inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
 [inventory]                                  | NXAPI: display "show inventory" info
 [license_hostid]                             | NXAPI: display license host_id for one or more NX-OS switches
+[locator_led_status]                         | NXAPI: display locator-led status for chassis, modules, fans
 [switch_find_files]                          | NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices
 [switch_reload]                              | NXAPI: reload (or install reset) one or more NX-OS devices
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
@@ -223,6 +224,7 @@ netbox_url: http://mynetbox.foo.com'
 [inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
 [inventory]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory.py
 [license_hostid]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/license_hostid.py
+[locator_led_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/locator_led_status.py
 [switch_find_files]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_find_files.py
 [switch_reload]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reload.py
 [test_vault_ansible]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_ansible.py

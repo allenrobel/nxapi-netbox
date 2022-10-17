@@ -29,7 +29,7 @@ from nxapi.nxapi_license_hostid import NxapiLicenseHostid
 def get_parser():
     parser = argparse.ArgumentParser(
         description='NXAPI: display license host_id for one or more NX-OS switches.',
-            parents=[ArgsCookie, ArgsNxapiTools])
+        parents=[ArgsCookie, ArgsNxapiTools])
 
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
     optional = parser.add_argument_group(title='OPTIONAL SCRIPT ARGS')
