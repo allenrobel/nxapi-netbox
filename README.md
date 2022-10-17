@@ -30,6 +30,8 @@ Script                                       | Description
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
 [test_vault_hashicorp]                       | Verify that HashiCorp Vault is working and contains the keys required by scripts in this repo
 
+![Data Flow]( assets/nxapi-netbox-data-flow.png)
+
 The scripts use Netbox (currently only for name resolution, but likely for more later...).
 
 The scripts also access a vault for usernames, passwords, tokens, and urls.  You can choose on the command line between Hashicorp Vault, or Ansible Vault.  If you want to remove these dependencies, the scripts are easily modified to hardcode these things (or use some other method to retrieve them), since the calls to each of the NXAPI objects take ``username``, ``password``, ``IP/Hostname``, and a ``logging instance`` as parameters.  An example call is shown below.
