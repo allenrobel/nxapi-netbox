@@ -90,8 +90,10 @@ VAULT_TOKEN=hvs.SiVa7BDO92FfETBLdQuMxSCq
 
 ##### If using Ansible Vault
 
+```bash
 % env | grep ANSIBLE_VAULT_PATH
 VAULT_TOKEN=hvs.SiVa7BDO92FfETBLdQuMxSCq
+```
 
 #### 3. HashiCorp Vault
 
