@@ -2,6 +2,8 @@
 
 This repo contains scripts and libraries to interact with Cisco NX-OS switches over NXAPI.
 
+![Data Flow]( assets/nxapi-netbox-data-flow.png)
+
 We'll be adding many more scripts and libraries over the next week or so (as of 2022-10-14) as we sanitize an internal cache of about 90 scripts and 50 libraries.
 
 Script                                       | Description
@@ -30,7 +32,7 @@ Script                                       | Description
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
 [test_vault_hashicorp]                       | Verify that HashiCorp Vault is working and contains the keys required by scripts in this repo
 
-![Data Flow]( assets/nxapi-netbox-data-flow.png)
+
 
 The scripts use Netbox (currently only for name resolution, but likely for more later...).
 
