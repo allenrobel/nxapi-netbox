@@ -4,7 +4,7 @@ This repo contains scripts and libraries to interact with Cisco NX-OS switches o
 
 ![Data Flow]( assets/nxapi-netbox-data-flow.png)
 
-We'll be adding many more scripts and libraries over the next week or so (as of 2022-10-14) as we sanitize an internal cache of about 90 scripts and 50 libraries.
+We'll be adding more scripts and libraries over the next week or so (as of 2022-10-14) as we sanitize an internal cache of about 90 scripts and 50 libraries.
 
 Script                                       | Description
 ------------                                 | -----------
