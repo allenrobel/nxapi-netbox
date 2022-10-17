@@ -33,7 +33,8 @@ Script                                       | Description
 [interface_packet_rates]                     | NXAPI: display interface input/output packet rates for a set of interfaces
 [inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
 [inventory]                                  | NXAPI: display "show inventory" info
-[license_hostid]                             | NXAPI: display license host_id for one or more NX-OS switches
+[license_hostid]                             | NXAPI: display license host_id
+[lldp_neighbors]                             | NXAPI: display lldp neighbor info
 [locator_led_status]                         | NXAPI: display locator-led status for chassis, modules, fans
 [switch_find_files]                          | NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices
 [switch_reload]                              | NXAPI: reload (or install reset) one or more NX-OS devices
@@ -224,6 +225,7 @@ netbox_url: http://mynetbox.foo.com'
 [inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
 [inventory]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory.py
 [license_hostid]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/license_hostid.py
+[lldp_neighbors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/lldp_neighbors.py
 [locator_led_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/locator_led_status.py
 [switch_find_files]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_find_files.py
 [switch_reload]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reload.py
