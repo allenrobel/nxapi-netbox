@@ -4,6 +4,13 @@ This repo contains scripts and libraries to interact with Cisco NX-OS switches o
 
 ![Data Flow]( assets/nxapi-netbox-data-flow.png)
 
+### Data Flow
+1. Read environment variables to access vault
+2. From vault, read Netbox url/token and NX-OS username/password
+3. From Netbox, convert device names to mgmt_ip address (Netbox can provide much more over time using e.g. roles, tags, etc)
+4. Interact with NX-OS devices over NXAPI
+
+### Script Inventory
 We'll be adding more scripts and libraries over the next week or so (as of 2022-10-14) as we sanitize an internal cache of about 90 scripts and 50 libraries.
 
 Script                                       | Description
