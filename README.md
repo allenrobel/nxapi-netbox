@@ -23,6 +23,7 @@ Script                                       | Description
 [bgp_neighbor_prefix_received]               | NXAPI: display bgp neighbor summary info
 [bgp_neighbor_state]                         | NXAPI: display bgp neighbor state for all neighbors
 [bgp_neighbors]                              | NXAPI: display detailed bgp neighbor information
+[bgp_neighbors_l2vpn_evpn]                   | NXAPI: display bgp l2vpn evpn neighbor info
 [forwarding_consistency]                     | NXAPI: start and display results for forwarding consistency checker
 [forwarding_route_ipv4]                      | NXAPI: Display ipv4 prefix information from FIB related to --module --vrf --prefix
 [forwarding_route_summary_ipv4]              | NXAPI: display forwarding ipv4 route summary
@@ -218,6 +219,7 @@ netbox_url: http://mynetbox.foo.com'
 [bgp_neighbor_prefix_received]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_neighbor_prefix_received.py
 [bgp_neighbor_state]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_neighbor_state.py
 [bgp_neighbors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_neighbors.py
+[bgp_neighbors_l2vpn_evpn]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_neighbors_l2vpn_evpn.py
 [forwarding_consistency]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/forwarding_consistency.py
 [forwarding_route_ipv4]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/forwarding_route_ipv4.py
 [forwarding_route_summary_ipv4]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/forwarding_route_summary_ipv4.py
