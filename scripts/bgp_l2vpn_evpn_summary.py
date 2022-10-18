@@ -97,6 +97,6 @@ for device in devices:
     t = Thread(target=worker, args=(device, vault))
     t.start()
     t.join()
-for sid in sorted(output):
-    for line in output[sid]:
+for ip in sorted(output):
+    for line in output[ip]:
         print('{}'.format(line))
