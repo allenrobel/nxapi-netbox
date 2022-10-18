@@ -31,8 +31,9 @@ Script                                       | Description
 [interface_info]                             | NXAPI: display info from "show interface" cli
 [interface_last_flapped]                     | NXAPI: display interface last flapped/cleared timers, and reset info
 [interface_packet_rates]                     | NXAPI: display interface input/output packet rates for a set of interfaces
-[inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
 [inventory]                                  | NXAPI: display "show inventory" info
+[inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
+[inventory_switch_serial_numbers]            | NXAPI: display all serial numbers
 [license_hostid]                             | NXAPI: display license host_id
 [lldp_neighbors]                             | NXAPI: display lldp neighbor info
 [locator_led_status]                         | NXAPI: display locator-led status for chassis, modules, fans
@@ -224,8 +225,9 @@ netbox_url: http://mynetbox.foo.com'
 [interface_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_info.py
 [interface_last_flapped]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_last_flapped.py
 [interface_packet_rates]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_packet_rates.py
-[inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
 [inventory]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory.py
+[inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
+[inventory_switch_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_switch_serial_numbers.py
 [license_hostid]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/license_hostid.py
 [lldp_neighbors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/lldp_neighbors.py
 [locator_led_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/locator_led_status.py
