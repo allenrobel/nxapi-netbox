@@ -37,7 +37,6 @@ from vault.vault import get_vault
 from nxapi.nxapi_lldp import NxapiLldpNeighbors
 
 def get_parser():
-
     parser = argparse.ArgumentParser(
         description='DESCRIPTION: NXAPI: display lldp neighbor info for one or more NX-OS switches.',
         parents=[ArgsCookie, ArgsNxapiTools])
@@ -47,7 +46,7 @@ def get_parser():
 
     parser.add_argument('--version',
                         action='version', 
-                        version='%(prog)s ' + str(our_version))
+                        version='{} v{}'.format('%(prog)s', our_version))
     return parser.parse_args()
 
 def get_device_list():

@@ -36,6 +36,7 @@ Script                                       | Description
 [license_hostid]                             | NXAPI: display license host_id
 [lldp_neighbors]                             | NXAPI: display lldp neighbor info
 [locator_led_status]                         | NXAPI: display locator-led status for chassis, modules, fans
+[mac_address_count]                          | NXAPI: display mac address-table count
 [switch_find_files]                          | NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices
 [switch_reload]                              | NXAPI: reload (or install reset) one or more NX-OS devices
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
@@ -227,6 +228,7 @@ netbox_url: http://mynetbox.foo.com'
 [license_hostid]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/license_hostid.py
 [lldp_neighbors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/lldp_neighbors.py
 [locator_led_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/locator_led_status.py
+[mac_address_count]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/mac_address_count.py
 [switch_find_files]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_find_files.py
 [switch_reload]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reload.py
 [test_vault_ansible]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_ansible.py
