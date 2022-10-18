@@ -3,7 +3,7 @@ our_version = 103
 script_name = 'switch_bootvar'
 '''
 Name: switch_bootvar.py
-Description: NXAPI: show the current bootvar strings
+Description: NXAPI: display current bootvar info
 
 If not specified, --sup_instance defaults to 1
 
@@ -36,7 +36,7 @@ from nxapi.nxapi_boot import NxapiBoot
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: NXAPI: show the current bootvar strings.',
+        description='DESCRIPTION: NXAPI: display current bootvar info.',
             parents=[ArgsCookie, ArgsNxapiTools])
     mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
     default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
