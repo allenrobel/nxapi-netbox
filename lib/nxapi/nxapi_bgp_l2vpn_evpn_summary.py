@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 101
+our_version = 102
 # NxapiBgpL2vpnEvpnSummary() - nxapi_bgp_l2vpn_evpn_summary.py
 # standard libraries
 # local libraries
@@ -7,7 +7,7 @@ from nxapi.nxapi_base import NxapiBase
 '''
 Name: nxapi_bgp_l2vpn_evpn_summary.py
 Author: Allen Robel (arobel@cisco.com)
-Description: Classes containing methods for retrieving bgp ipv4/ipv6 unicast summary information 
+Description: Classes for retrieving bgp l2vpn evpn summary information 
 
 NOTES:
 

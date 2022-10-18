@@ -18,6 +18,7 @@ Script                                       | Description
 [arp_summary]                                | NXAPI: display ip arp summary
 [bfd_neighbor_info]                          | NXAPI: display bfd neighbors detail information
 [bfd_neighbor_state]                         | NXAPI: display bfd neighbor state for all neighbors
+[bgp_l2vpn_evpn_summary]                     | NXAPI: display bgp l2vpn evpn summary
 [bgp_neighbor_l2vpn_evpn_prefix_received]    | NXAPI: display bgp l2vpn evpn summary info
 [bgp_neighbor_prefix_received]               | NXAPI: display bgp neighbor summary info
 [bgp_neighbor_state]                         | NXAPI: display bgp neighbor state for all neighbors
@@ -211,6 +212,7 @@ netbox_url: http://mynetbox.foo.com'
 
 [arp_summary]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/arp_summary.py
 [bfd_neighbor_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bfd_neighbor_info.py
+[bgp_l2vpn_evpn_summary]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_l2vpn_evpn_summary.py
 [bfd_neighbor_state]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bfd_neighbor_state.py
 [bgp_neighbor_l2vpn_evpn_prefix_received]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_neighbor_l2vpn_evpn_prefix_received.py
 [bgp_neighbor_prefix_received]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_neighbor_prefix_received.py
