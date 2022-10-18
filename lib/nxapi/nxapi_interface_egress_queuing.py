@@ -2,12 +2,12 @@
 '''
 Name: nxapi_interface_egress_queuing.py
 Author: Allen Robel (arobel@cisco.com)
-Description: Class containing methods for retrieving interface queuing counters
+Description: Class for retrieving interface queuing counters
 
 Synopsis:
 
 '''
-our_version = 103
+our_version = 104
 
 # standard libraries
 from copy import deepcopy
@@ -29,21 +29,21 @@ class NxapiInterfaceEgressQueuing(NxapiBase):
         self.properties['unit'] = None
 
         self.valid_stat_type = set()
-        self.valid_stat_type.add('tx')
         self.valid_stat_type.add('ecn')
-        self.valid_stat_type.add('tail_drop')
         self.valid_stat_type.add('q_depth')
+        self.valid_stat_type.add('tail_drop')
+        self.valid_stat_type.add('tx')
+        self.valid_stat_type.add('wd_tail_drop')
+        self.valid_stat_type.add('wred_afd_tail_drop')
         self.stat_types = list(sorted(self.valid_stat_type))
 
         self.stat_type_map = dict()
-        self.stat_type_map['tail_drop'] = 'WRED/AFD & Tail Drop'
-        self.stat_type_map['ecn'] = 'ECN'
-        self.stat_type_map['tx'] = 'Tx'
-        self.stat_type_map['q_depth'] = 'Q Depth'
-        self.stat_type_map['WRED/AFD & Tail Drop'] = 'tail_drop'
         self.stat_type_map['ECN'] = 'ecn'
-        self.stat_type_map['Tx'] = 'tx'
+        self.stat_type_map['Tail Drop'] = 'tail_drop'
         self.stat_type_map['Q Depth'] = 'q_depth'
+        self.stat_type_map['Tx'] = 'tx'
+        self.stat_type_map['WD & Tail Drop'] = 'wd_tail_drop'
+        self.stat_type_map['WRED/AFD & Tail Drop'] = 'wred_afd_tail_drop'
 
         self.valid_unit = set()
         self.valid_unit.add('packets')
@@ -51,22 +51,20 @@ class NxapiInterfaceEgressQueuing(NxapiBase):
         self.units = list(sorted(self.valid_unit))
 
         self.unit_map = dict()
-        self.unit_map['packets'] = 'Pkts'
-        self.unit_map['bytes'] = 'Byts'
         self.unit_map['Pkts'] = 'packets'
         self.unit_map['Byts'] = 'bytes'
 
         self.valid_counter_name = set()
         self.valid_counter_name.add('eq-stat-type')
         self.valid_counter_name.add('eq-stat-units')
-        self.valid_counter_name.add('eq-uc-stat-value')
         self.valid_counter_name.add('eq-mc-stat-value')
+        self.valid_counter_name.add('eq-uc-stat-value')
 
         self.counter_names = sorted(self.valid_counter_name)
 
         self.valid_protocol = set()
-        self.valid_protocol.add('uc')
         self.valid_protocol.add('mc')
+        self.valid_protocol.add('uc')
         self.protocols = sorted(self.valid_protocol)
 
         self.qos_groups = [0,1,2,3,4,5,6,7,'cpu','span']
@@ -85,17 +83,6 @@ class NxapiInterfaceEgressQueuing(NxapiBase):
             return
         self._queuing_interface_dict = _list[0]
 
-    def make_dict_orig(self,key):
-        d = dict()
-        d[key] = dict()
-        for stat_type in self.stat_types:
-            d[key][stat_type] = dict()
-            for unit in self.valid_unit:
-                d[key][stat_type][unit] = dict()
-                d[key][stat_type][unit]['uc'] = None
-                d[key][stat_type][unit]['mc'] = None
-        return deepcopy(d)
-
     def make_dict(self):
         d = dict()
         for stat_type in self.stat_types:
@@ -109,24 +96,34 @@ class NxapiInterfaceEgressQueuing(NxapiBase):
     def get_stat_type(self,x):
         if x in self.stat_type_map:
             return self.stat_type_map[x]
+        self.log.warning('unknown stat_type {}, returning na'.format(x))
         return 'na'
     def get_stat_unit(self,x):
         if x in self.unit_map:
             return self.unit_map[x]
+        self.log.warning('unknown stat_unit {}, returning na'.format(x))
         return 'na'
     def get_stat_value(self,x):
         if x == None:
             return 'na'
         return x
 
-    def _get_qosgrp_egress_stats_entry(self, d, key):
+    def _get_qosgrp_egress_stats_entry(self, d):
         d1 = self.make_dict()
-        l = self._get_table_row('qosgrp_egress_stats_entry', d)
-        if l == False:
+        t = self._get_table_row('qosgrp_egress_stats_entry', d)
+        if t == False:
             return d1
-        for d2 in l:
+        for d2 in t:
             stat_type = self.get_stat_type(d2['eq-stat-type'])
             unit = self.get_stat_unit(d2['eq-stat-units'])
+            if stat_type == 'na':
+                continue
+            if unit == 'na':
+                continue
+            if stat_type not in d1:
+                d1[stat_type] = dict()
+            if unit not in d1[stat_type]:
+                d1[stat_type][unit] = dict()
             d1[stat_type][unit]['uc'] = self.get_stat_value(d2['eq-uc-stat-value'])
             d1[stat_type][unit]['mc'] = self.get_stat_value(d2['eq-mc-stat-value'])
         return deepcopy(d1)
@@ -154,8 +151,7 @@ class NxapiInterfaceEgressQueuing(NxapiBase):
                 self.log.warning('SKIP: missing key eq-qosgrp: {}'.format(d))
                 continue
             key = self.get_name_key(d['eq-qosgrp'])
-            self._qosgrp_egress_stats_dict[key] = self._get_qosgrp_egress_stats_entry(d, key)
-            #print('DEBUG self._qosgrp_egress_stats_dict[{}] {}'.format(name_key, self._qosgrp_egress_stats_dict[name_key]))
+            self._qosgrp_egress_stats_dict[key] = self._get_qosgrp_egress_stats_entry(d)
 
 
     def refresh(self):
@@ -297,5 +293,11 @@ class NxapiInterfaceEgressQueuing(NxapiBase):
     @property
     def tail_drop(self):
         return self.get_counter('tail_drop')
+    @property
+    def wd_tail_drop(self):
+        return self.get_counter('wd_tail_drop')
+    @property
+    def wred_afd_tail_drop(self):
+        return self.get_counter('wred_afd_tail_drop')
 
     
