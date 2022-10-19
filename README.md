@@ -33,6 +33,7 @@ Script                                       | Description
 [interface_errors]                           | NXAPI: display non-zero interface error counters
 [interface_info]                             | NXAPI: display info from "show interface" cli
 [interface_last_flapped]                     | NXAPI: display interface last flapped/cleared timers, and reset info
+[interface_link_not_connected]               | NXAPI: display interfaces in notconnect state (Link not connected)
 [interface_packet_rates]                     | NXAPI: display interface input/output packet rates for a set of interfaces
 [inventory]                                  | NXAPI: display "show inventory" info
 [inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
@@ -232,6 +233,7 @@ netbox_url: http://mynetbox.foo.com'
 [interface_errors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_errors.py
 [interface_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_info.py
 [interface_last_flapped]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_last_flapped.py
+[interface_link_not_connected]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_link_not_connected.py
 [interface_packet_rates]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_packet_rates.py
 [inventory]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory.py
 [inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
