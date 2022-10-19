@@ -3,18 +3,30 @@
 Name: interface_last_flapped.py
 Description: NXAPI: display interface last flapped/cleared timers, and reset info
 
-Timers are converted to seconds.
+flapped and cleared timers are converted to seconds.
 
-Synopsis:
+Example usage:
 
-./nxapi_interface_last_flapped.py --vault hashicorp --device leaf_1,leaf_2 [--interface Eth1/1]
+% ./interface_last_flapped.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2 --interface Eth1/49,Eth1/50,Eth1/51,Eth1/52
+ip              hostname           interface       state   admin   flapped   cleared   resets
+192.168.11.102  cvd-1311-leaf      Ethernet1/49    up      up      5818.0    1045.0    0     
+192.168.11.102  cvd-1311-leaf      Ethernet1/50    up      up      151200.0  151200.0  4     
+192.168.11.102  cvd-1311-leaf      Ethernet1/51    up      up      151200.0  151200.0  4     
+192.168.11.102  cvd-1311-leaf      Ethernet1/52    up      up      151200.0  151200.0  4     
+
+192.168.11.103  cvd-1312-leaf      Ethernet1/49    up      up      151200.0  151200.0  4     
+192.168.11.103  cvd-1312-leaf      Ethernet1/50    up      up      151200.0  151200.0  4     
+192.168.11.103  cvd-1312-leaf      Ethernet1/51    up      up      151200.0  151200.0  4     
+192.168.11.103  cvd-1312-leaf      Ethernet1/52    up      up      151200.0  151200.0  4     
+
+% 
 '''
-our_version = 104
+our_version = 105
 script_name = 'interface_last_flapped'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
 from args.args_cookie import ArgsCookie
@@ -65,10 +77,17 @@ def get_max_width(d):
     return width
 
 def print_header():
-    print(fmt.format('dut', 'interface', 'state', 'admin', 'flapped', 'cleared', 'resets'))
+    print(fmt.format('ip', 'hostname', 'interface', 'state', 'admin', 'flapped', 'cleared', 'resets'))
 
-def print_values(hostname, interface, state, admin, flapped, cleared, resets):
-    print(fmt.format(hostname, interface, state, admin, flapped, cleared, resets))
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+        if len(output) > 0:
+            print()
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -81,12 +100,12 @@ def worker(device, vault):
     s.nxapi_init(cfg)
     s.interface = cfg.interface
     s.refresh()
-    with lock:
-        for interface in s.info:
-            i.interface = interface
-            i.refresh()
-            print_values(i.hostname, i.interface, i.state, i.admin_state, i.eth_link_flapped, i.eth_clear_counters, i.eth_reset_cntr)
-        print()
+    lines = list()
+    for interface in s.info:
+        i.interface = interface
+        i.refresh()
+        lines.append(fmt.format(ip, i.hostname, i.interface, i.state, i.admin_state, i.eth_link_flapped, i.eth_clear_counters, i.eth_reset_cntr))
+    return lines
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
 vault = get_vault(cfg.vault)
@@ -95,10 +114,12 @@ nb = netbox(vault)
 
 devices = get_device_list()
 
-fmt = '{:<15} {:<15} {:<7} {:<7} {:<9} {:<9} {:<6}'
+fmt = '{:<15} {:<18} {:<15} {:<7} {:<7} {:<9} {:<9} {:<6}'
 print_header()
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
