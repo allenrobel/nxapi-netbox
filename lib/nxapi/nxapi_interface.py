@@ -225,7 +225,7 @@ NxapiInterfaceAll() use the following when adding attributes for new interface t
 our_version = 110
 
 from nxapi.nxapi_base import NxapiBase
-
+from general.util import NxTimer
 class NxapiInterfaceStatus(NxapiBase):
     '''
     return a dictionary with the following structure:
@@ -384,6 +384,7 @@ class NxapiInterface(NxapiBase):
         self._info_dict = dict()
         self.virtual_interfaces = ['vl', 'nv', 'po', 'lo', '.']
         self.refreshed = False
+        self.nx_timer = NxTimer()
 
     def is_virtual_interface(self,interface):
         '''
@@ -1002,7 +1003,7 @@ class NxapiInterfaceAll(NxapiBase):
         self._interface = None
         self.virtual_interfaces = ['vl', 'nv', 'po', 'lo', '.']
         self.refreshed = False
-
+        self.nx_timer = NxTimer()
         self.default_interface_dict = {
             'interface': 'na',
             'state': 'na',
