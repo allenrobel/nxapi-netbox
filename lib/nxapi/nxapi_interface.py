@@ -286,6 +286,19 @@ class NxapiInterfaceStatus(NxapiBase):
             self._info_dict[interface] = _dict
 
     @property
+    def duplex(self):
+        '''
+        i.refresh()
+        i.interface = 'Ethernet1/1'
+        print('Ethernet1/1 duplex {}'.format(i.duplex))
+        '''
+        try:
+            return self.info[self._interface]['duplex']
+        except Exception as e:
+            self.log.debug('Exception was {}'.format(e))
+            return 'na'
+
+    @property
     def interface(self):
         return self._interface
     @interface.setter
@@ -297,11 +310,65 @@ class NxapiInterfaceStatus(NxapiBase):
     def info(self):
         '''
         return the main dictionary created by this library self._info_dict
+        dict is keyed on iterface.  The value is a dict with the following format:
+        {'interface': 'Ethernet1/34', 'state': 'xcvrAbsent', 'vlan': 'trunk', 'duplex': 'auto', 'speed': 'auto', 'type': '--'}
         '''
         try:
             return self._info_dict
         except:
             return dict()
+
+    @property
+    def speed(self):
+        '''
+        i.refresh()
+        i.interface = 'Ethernet1/1'
+        print('Ethernet1/1 speed {}'.format(i.speed))
+        '''
+        try:
+            return self.info[self._interface]['speed']
+        except Exception as e:
+            self.log.debug('Exception was {}'.format(e))
+            return 'na'
+
+    @property
+    def state(self):
+        '''
+        i.refresh()
+        i.interface = 'Ethernet1/1'
+        print('Ethernet1/1 state {}'.format(i.state))
+        '''
+        try:
+            return self.info[self._interface]['state']
+        except Exception as e:
+            self.log.debug('Exception was {}'.format(e))
+            return 'na'
+
+    @property
+    def type(self):
+        '''
+        i.refresh()
+        i.interface = 'Ethernet1/1'
+        print('Ethernet1/1 type {}'.format(i.type))
+        '''
+        try:
+            return self.info[self._interface]['type']
+        except Exception as e:
+            self.log.debug('Exception was {}'.format(e))
+            return 'na'
+
+    @property
+    def vlan(self):
+        '''
+        i.refresh()
+        i.interface = 'Ethernet1/1'
+        print('Ethernet1/1 vlan {}'.format(i.vlan))
+        '''
+        try:
+            return self.info[self._interface]['vlan']
+        except Exception as e:
+            self.log.debug('Exception was {}'.format(e))
+            return 'na'
 
 class NxapiInterface(NxapiBase):
     '''
