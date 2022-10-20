@@ -7,12 +7,12 @@ Synopsis:
 
 ./interface_egress_queuing.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2  --interface Ethernet1/1 --qos 1,3,span,cpu
 '''
-our_version = 105
+our_version = 106
 script_name = 'interface_egress_queuing'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 from re import split
 # local libraries
 from args.args_cookie import ArgsCookie
@@ -24,10 +24,10 @@ from vault.vault import get_vault
 from nxapi.nxapi_interface_egress_queuing import NxapiInterfaceEgressQueuing
 
 def get_parser():
-    help_interface = 'Interface(s) to monitor.'
+    help_interfaces = 'Interface(s) to monitor.'
     help_qos = 'QOS group(s) to monitor. Default: QOS group 0 will be monitored.'
     help_non_zero = 'If present, display only non-zero counters.'
-    ex_interface = 'Example: --interface Eth1/1'
+    ex_interfaces = 'Example: --interfaces Eth1/1'
     ex_qos = 'Example: --qos 0,1,cpu,span'
     ex_non_zero = 'Example: --non_zero'
 
@@ -43,11 +43,10 @@ def get_parser():
                         action='store_true',
                         help='{} {}'.format(help_non_zero, ex_non_zero))
 
-    mandatory.add_argument('--interface',
-                        dest='interface',
-                        required=False,
-                        default=None,
-                        help='{} {}'.format(help_interface, ex_interface))
+    mandatory.add_argument('--interfaces',
+                        dest='interfaces',
+                        required=True,
+                        help='{} {}'.format(help_interfaces, ex_interfaces))
 
     default.add_argument('--qos',
                         dest='qos',
@@ -71,12 +70,20 @@ def get_device_list():
 
 def get_interface_list():
     try:
-        return cfg.interface.split(',')
+        return cfg.interfaces.split(',')
     except:
-        log.error('exiting. Cannot parse --interface {}.  Example usage: --interface Ethernet1/1'.format(cfg.interface))
+        log.error('exiting. Cannot parse --interfaces {}.  Example usage: --interfaces Ethernet1/1'.format(cfg.interfaces))
         exit(1)
 
-def print_head():
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
+def print_header():
     print(fmt.format(
         'ip',
         'hostname',
@@ -87,12 +94,12 @@ def print_head():
         'protocol',
         'value'))
 
-def print_values(ip, hostname, interface, qos_group, units, protocol, value, stat_type):
+def get_values(ip, hostname, interface, qos_group, units, protocol, value, stat_type):
     if cfg.non_zero == True and value == 0:
-        return
+        return None
     if cfg.non_zero == True and value == 'na':
-        return
-    line = fmt.format(
+        return None
+    return fmt.format(
         ip,
         hostname,
         interface,
@@ -101,7 +108,6 @@ def print_values(ip, hostname, interface, qos_group, units, protocol, value, sta
         units,
         protocol,
         value)
-    lines.append(line)
 
 def get_list_from_comma_separated_string(x):
     if ',' in str(x):
@@ -109,27 +115,44 @@ def get_list_from_comma_separated_string(x):
     else:
         return [x]
 
+def collect_info(ip, nx):
+    nx.unit = 'packets'
+    nx.protocol = 'uc'
+    lines = list()
+    for qos_group in get_list_from_comma_separated_string(cfg.qos):
+        nx.qos_group = qos_group
+        x = get_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.ecn, 'ecn')
+        if x != None:
+            lines.append(x)
+        x = get_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.tx, 'tx')
+        if x != None:
+            lines.append(x)
+        x = get_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.tail_drop, 'tail_drop')
+        if x != None:
+            lines.append(x)
+        x = get_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.wd_tail_drop, 'wd_tail_drop')
+        if x != None:
+            lines.append(x)
+        x = get_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.wred_afd_tail_drop, 'wred_afd_tail_drop')
+        if x != None:
+            lines.append(x)
+    nx.unit = 'bytes'
+    for qos_group in get_list_from_comma_separated_string(cfg.qos):
+        nx.qos_group = qos_group
+        x = get_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.q_depth, 'q_depth')
+        if x != None:
+            lines.append(x)
+    if len(lines) != 0:
+        lines.append('')
+    return lines
+
 def worker(device, interface, vault):
     ip = get_device_mgmt_ip(nb, device)
     nx = NxapiInterfaceEgressQueuing(vault.nxos_username, vault.nxos_password, ip, log)
     nx.nxapi_init(cfg)
     nx.interface = interface
     nx.refresh()
-    with lock:
-        nx.unit = 'packets'
-        nx.protocol = 'uc'
-        for qos_group in get_list_from_comma_separated_string(cfg.qos):
-            nx.qos_group = qos_group
-            print_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.ecn, 'ecn')
-            print_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.tx, 'tx')
-            print_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.tail_drop, 'tail_drop')
-            print_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.wd_tail_drop, 'wd_tail_drop')
-            print_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.wred_afd_tail_drop, 'wred_afd_tail_drop')
-        nx.unit = 'bytes'
-        for qos_group in get_list_from_comma_separated_string(cfg.qos):
-            nx.qos_group = qos_group
-            print_values(ip, nx.hostname, nx.interface, nx.qos_group, nx.unit, nx.protocol, nx.q_depth, 'q_depth')
-
+    return collect_info(ip, nx)
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -139,17 +162,15 @@ nb = netbox(vault)
 
 devices = get_device_list()
 if len(devices) > 1:
-    log.error('exiting. This script supports only one target device. Got --devicess {}'.format(devices))
+    log.error('exiting. This script supports only one target device. Got --devices {}'.format(devices))
     exit(1)
 
 fmt = '{:<15} {:<18} {:<15} {:<9} {:<18} {:<8} {:>15} {:>15}'
-print_head()
-lock = Lock()
+print_header()
 
-lines = list()
-for interface in get_list_from_comma_separated_string(cfg.interface):
-    t = Thread(target=worker, args=(devices[0], interface, vault))
-    t.start()
-    t.join(timeout=30.0)
-for line in sorted(lines):
-    print(line)
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
+for interface in get_list_from_comma_separated_string(cfg.interfaces):
+    args = [devices[0], interface, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
