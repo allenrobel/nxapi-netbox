@@ -3,12 +3,11 @@
 Name: bgp_neighbor_prefix_received.py
 Description: NXAPI: display bgp neighbor summary info
 '''
-our_version = 107
+our_version = 108
 script_name = 'bgp_neighbor_prefix_received'
 # standard libraries
 import argparse
-from threading import Thread, active_count
-from time import sleep
+from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
 from args.args_cookie import ArgsCookie
@@ -20,7 +19,7 @@ from vault.vault import get_vault
 from nxapi.nxapi_bgp_unicast_summary import NxapiBgpUnicastSummaryIpv4, NxapiBgpUnicastSummaryIpv6
 
 def get_parser():
-    help_afi = 'address family to query. one of ipv4 or ipv6 or all. If all is selected, then all address families are displayed'
+    help_afi = 'address family to query. one of ipv4 or ipv6.'
     help_nonzero = 'if specified, only display neighbors with non-zero prefixes received'
     ex_prefix = 'Example: '
     ex_afi = '{} --afi ipv6'.format(ex_prefix)
@@ -59,6 +58,14 @@ def get_device_list():
 def print_header():
     print(fmt.format('ip', 'hostname', 'neighbor', 'prefix_rx'))
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def collect_prefix_rx(ip, bgp):
     lines = list()
     for neighbor in bgp.neighbor_info:
@@ -74,7 +81,8 @@ def collect_prefix_rx(ip, bgp):
         if prefixreceived == 0 and cfg.nonzero == True:
             continue
         lines.append(fmt.format(ip, bgp.hostname, bgp.neighbor, bgp.prefixreceived))
-    output[ip] = lines
+    lines.append('')
+    return lines
 
 def get_instance(ip, vault):
     '''
@@ -94,7 +102,7 @@ def worker(device, vault):
     instance.nxapi_init(cfg)
     instance.vrf = cfg.vrf
     instance.refresh()
-    collect_prefix_rx(ip, instance)
+    return collect_prefix_rx(ip, instance)
 
 def get_fmt():
     fmt_ipv6 = '{:<15} {:<18} {:<40} {:>9}'
@@ -109,19 +117,15 @@ log = get_logger(script_name, cfg.loglevel, 'DEBUG')
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
-# keyed on ip address, value is a list containing the worker's output
-output = dict()
 
 devices = get_device_list()
 
 fmt = get_fmt()
 print_header()
 
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join(timeout=5)
-for sid in sorted(output):
-    for line in output[sid]:
-        print('{}'.format(line))
-    print()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
