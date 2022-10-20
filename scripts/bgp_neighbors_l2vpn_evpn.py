@@ -3,12 +3,11 @@
 Name: bgp_neighbors_l2vpn_evpn.py
 Description: NXAPI: display bgp l2vpn evpn neighbor info
 '''
-our_version = 101
+our_version = 102
 script_name = 'bgp_neighbors_l2vpn_evpn'
 # standard libraries
 import argparse
-from threading import Thread, Lock
-from time import sleep
+from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
 from args.args_cookie import ArgsCookie
@@ -61,7 +60,15 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
-def append_lines(ip, nx, lines):
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
+def collect_output(ip, nx, lines):
     lines.append(fmt.format(ip, nx.hostname, 'neighborid', nx.neighborid))
     lines.append(fmt.format(ip, nx.hostname, 'neighborversion', nx.neighborversion))
     lines.append(fmt.format(ip, nx.hostname, 'msgrecvd', nx.msgrecvd))
@@ -89,8 +96,8 @@ def show_bgp_neighbors_l2vpn_evpn(ip, nx, state=None):
             exit(1)
         if prefixreceived == 0 and cfg.nonzero == True:
             continue
-        append_lines(ip, nx, lines)
-    output[ip] = lines
+        collect_output(ip, nx, lines)
+    return lines
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -98,8 +105,7 @@ def worker(device, vault):
     nx.nxapi_init(cfg)
     nx.vrf = cfg.vrf
     nx.refresh()
-    with lock:
-        show_bgp_neighbors_l2vpn_evpn(ip, nx, cfg.state)
+    return show_bgp_neighbors_l2vpn_evpn(ip, nx, cfg.state)
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -111,16 +117,9 @@ devices = get_device_list()
 
 fmt = '{:<4} {:<14} {:<20} {:>14}'
 
-# keyed on ip, value is a list containing the worker's output
-output = dict()
-
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join()
-
-for ip in sorted(output):
-    print('--')
-    for line in output[ip]:
-        print('{}'.format(line))
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
