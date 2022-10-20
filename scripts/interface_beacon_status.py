@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 107
+our_version = 108
 '''
 Name: interface_beacon_status.py
 Description: NXAPI: display interface beacon status
@@ -17,8 +17,7 @@ script_name = 'interface_beacon_status'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
-
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -67,13 +66,40 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def print_header():
     print(fmt.format('ip', 'hostname', 'interface', 'state', 'admin', 'beacon', 'dut'))
 
-def print_values(ip, hostname, interface, state, admin, beacon):
+def get_values(ip, hostname, interface, state, admin, beacon):
     if cfg.on == True and (beacon == 'off' or beacon == 'na'):
-        return
-    print(fmt.format(ip, hostname, interface, state, admin, beacon))
+        return None
+    return fmt.format(ip, hostname, interface, state, admin, beacon)
+
+def collect_output(ip, interface_status, interface_detail):
+    lines = list()
+    for interface in interface_status.info:
+        if interface_detail.is_virtual_interface(interface):
+            continue
+        interface_detail.interface = interface
+        interface_detail.refresh()
+        x = get_values(ip,
+            interface_detail.hostname,
+            interface_detail.interface,
+            interface_detail.state,
+            interface_detail.admin_state,
+            interface_detail.eth_beacon)
+        if x != None:
+            lines.append(x)
+    if len(lines) != 0:
+        lines.append('')
+    return lines
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -85,14 +111,7 @@ def worker(device, vault):
 
     i = NxapiInterface(vault.nxos_username, vault.nxos_password, ip, log)
     i.nxapi_init(cfg)
-    with lock:
-        for interface in s.info:
-            if i.is_virtual_interface(interface):
-                continue
-            i.interface = interface
-            i.refresh()
-            print_values(ip, i.hostname, i.interface, i.state, i.admin_state, i.eth_beacon)
-        print()
+    return collect_output(ip, s, i)
 
 
 fmt = '{:<15} {:<18} {:<15} {:<7} {:<7} {:<6}'
@@ -106,7 +125,9 @@ devices = get_device_list()
 
 print_header()
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
