@@ -35,12 +35,12 @@ IP              Hostname                 Value Description
 192.168.11.101  cvd-1311-leaf                1 /128 prefixlen
 %
 '''
-our_version = 104
+our_version = 105
 script_name = 'forwarding_route_summary_ipv6'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 #local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -78,32 +78,44 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
-def print_header():
-    print(fmt.format('IP', 'Hostname', 'Value', 'Description'))
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
+def get_header():
+    return fmt.format('IP', 'Hostname', 'Value', 'Description')
+
+def collect_output(ip, fib):
+    lines = list()
+    lines.append(get_header())
+    lines.append(fmt.format(ip, fib.hostname, fib.route_count,   'FIBv6 routes'))
+    lines.append(fmt.format(ip, fib.hostname, fib.path_count,    'FIBv6 paths'))
+    lines.append(fmt.format(ip, fib.hostname, fib.route_updates, 'Route updates'))
+    lines.append(fmt.format(ip, fib.hostname, fib.route_inserts, 'Route inserts'))
+    lines.append(fmt.format(ip, fib.hostname, fib.route_deletes, 'Route deletes'))
+    for prefixlen in range(0, c.ipv6_mask_length + 1):
+        fib.mask_length = prefixlen
+        if fib.mask_length == -1:
+            continue
+        lines.append('{:<15} {:<20} {:>9} /{:<3} {:<9}'.format(ip, fib.hostname, fib.mask_length, prefixlen, 'prefixlen'))
+    return lines
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
-    fib = NxapiForwardingRouteSummaryIpv6(vault.nxos_username, vault.nxos_password, ip, log)
-    fib.nxapi_init(cfg)
-    fib.vrf = cfg.vrf
-    fib.module = cfg.module
-    fib.refresh()
-    with lock:
-        print_header()
-        print(fmt.format(ip, fib.hostname, fib.route_count,   'FIBv6 routes'))
-        print(fmt.format(ip, fib.hostname, fib.path_count,    'FIBv6 paths'))
-        print(fmt.format(ip, fib.hostname, fib.route_updates, 'Route updates'))
-        print(fmt.format(ip, fib.hostname, fib.route_inserts, 'Route inserts'))
-        print(fmt.format(ip, fib.hostname, fib.route_deletes, 'Route deletes'))
-        for prefixlen in range(0, c.ipv6_mask_length + 1):
-            fib.mask_length = prefixlen
-            if fib.mask_length == -1:
-                continue
-            print('{:<15} {:<20} {:>9} /{:<3} {:<9}'.format(ip, fib.hostname, fib.mask_length, prefixlen, 'prefixlen'))
+    nx = NxapiForwardingRouteSummaryIpv6(vault.nxos_username, vault.nxos_password, ip, log)
+    nx.nxapi_init(cfg)
+    nx.vrf = cfg.vrf
+    nx.module = cfg.module
+    nx.refresh()
+    return collect_output(ip, nx)
 
 fmt = '{:<15} {:<20} {:>9} {:<14}'
 
-c = Constants() # worker()
+c = Constants() # see collect_output()
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
 vault = get_vault(cfg.vault)
@@ -111,8 +123,9 @@ vault.fetch_data()
 nb = netbox(vault)
 
 devices = get_device_list()
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
