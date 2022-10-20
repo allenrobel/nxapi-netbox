@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 107
+our_version = 108
 '''
 Name: forwarding_route_ipv4.py
 Description: NXAPI: Display ipv4 prefix information from FIB related to --module --vrf --prefix 
@@ -37,7 +37,6 @@ script_name = 'forwarding_route_ipv4'
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-from tty import CFLAG
 
 # local libraries
 from args.args_cookie import ArgsCookie
