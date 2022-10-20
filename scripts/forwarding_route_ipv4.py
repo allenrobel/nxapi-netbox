@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 106
+our_version = 107
 '''
 Name: forwarding_route_ipv4.py
 Description: NXAPI: Display ipv4 prefix information from FIB related to --module --vrf --prefix 
@@ -36,7 +36,7 @@ script_name = 'forwarding_route_ipv4'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 from tty import CFLAG
 
 # local libraries
@@ -85,14 +85,22 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
-def print_path_ip_nexthop(path):
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
+def get_path_ip_nexthop(path):
     if 'ifname' not in path:
-        return
-    print('  next_hop {:<16} -> {:<20}'.format(path['ip_nexthop'], path['ifname']))
-def print_path_special(path):
+        return None
+    return '  next_hop {:<16} -> {:<20}'.format(path['ip_nexthop'], path['ifname'])
+def get_path_special(path):
     if 'special' not in path:
-        return
-    print('  next_hop {:<16} -> {:<20}'.format(path['special'], path['ifname']))
+        return None
+    return '  next_hop {:<16} -> {:<20}'.format(path['special'], path['ifname'])
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -107,13 +115,19 @@ def worker(device, vault):
         return
 
     f.refresh()
-    with lock:
-        print('hostname {} prefix {} num_paths {}'.format(f.hostname, f.ip_prefix, f.num_paths))
-        for path in f.path_info:
-            if 'ip_nexthop' in path:
-                print_path_ip_nexthop(path)
-            if 'special' in path:
-                print_path_special(path)
+    lines = list()
+    lines.append('hostname {} prefix {} num_paths {}'.format(f.hostname, f.ip_prefix, f.num_paths))
+    for path in f.path_info:
+        if 'ip_nexthop' in path:
+            x = get_path_ip_nexthop(path)
+            if x != None:
+                lines.append(x)
+        if 'special' in path:
+            x = get_path_special(path)
+            if x != None:
+                lines.append(x)
+    return lines
+            
 
 def verify_args():
     try:
@@ -134,8 +148,9 @@ vault.fetch_data()
 nb = netbox(vault)
 
 devices = get_device_list()
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
