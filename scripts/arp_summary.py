@@ -47,6 +47,7 @@ def print_header():
         'throttled',
         'unknown',
         'total'))
+
 def print_output(futures):
     for future in futures:
         output = future.result()
@@ -72,6 +73,7 @@ def worker(device, vault):
         arp.unknown,
         arp.total))
     return lines
+
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
 vault = get_vault(cfg.vault)
@@ -82,7 +84,6 @@ devices = get_device_list()
 
 fmt = '{:<15} {:<14} {:>10} {:>13} {:>15} {:>15} {:>12} {:>12}'
 print_header()
-
 executor = ThreadPoolExecutor(max_workers=len(devices))
 futures = list()
 for device in devices:

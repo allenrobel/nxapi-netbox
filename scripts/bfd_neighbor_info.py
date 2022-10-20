@@ -8,7 +8,7 @@ script_name = 'bfd_neighbor_info'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
 from args.args_cookie import ArgsCookie
@@ -53,22 +53,101 @@ def get_max_width(d):
             width = len(key)
     return width
 
-def print_head(width):
-    print('{:<15} {:<15} {:<{width}} {:<}'.format('dut', 'interface', 'key', 'value', width=width))
+def print_header():
+    print(fmt.format('ip', 'hostname', 'interface', 'key', 'value'))
 
-def print_prop(hostname, interface, width, key, value):
-    print("{:<15} {:<15} {:<{width}} {:<}".format(hostname, interface, key, value, width=width))
+def format_property(ip, hostname, interface, key, value):
+    return fmt.format(ip, hostname, interface, key, value)
 
-def print_info(d, hostname):
-    width = get_max_width(d)
-    if 'local_disc' not in d:
-        log.error('skipping. [local_disc] key not found in dictionary {}'.format(d))
-        return
-    local_disc = d['local_disc']
-    for key in sorted(d):
-        value = d[key]
-        print("{:<15} {:<15} {:<{width}} {:<}".format(hostname, local_disc, key, value, width=width))
-    print()
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
+def collect_info(ip, bfd):
+    '''
+    This demonstrates retrieving info from NxapiBfdNeighbors using explicit
+    property access.  It's the preferred way if you just want to retrieve a couple
+    items.  See also: get_info_from_info_dict() if you want to retrieve ALL items.
+    '''
+    lines = list()
+    for local_disc in bfd.info:
+        bfd.local_disc = local_disc
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'local_disc', bfd.local_disc))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'header', bfd.header))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'vrf_name', bfd.vrf_name))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'src_ip_addr', bfd.src_ip_addr))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'src_ipv6_addr', bfd.src_ipv6_addr))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'dest_ip_addr', bfd.dest_ip_addr))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'dest_ipv6_addr', bfd.dest_ipv6_addr))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'remote_disc', bfd.remote_disc))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'local_state', bfd.local_state))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'remote_state', bfd.remote_state))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'holddown', bfd.holddown))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'cur_detect_mult', bfd.cur_detect_mult))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'intf', bfd.intf))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'out_str', bfd.out_str))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'echo', bfd.echo))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'echo_tx', bfd.echo_tx))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'local_diag', bfd.local_diag))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'demand', bfd.demand))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'poll', bfd.poll))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'min_tx', bfd.min_tx))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'min_rx', bfd.min_rx))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'local_multi', bfd.local_multi))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'detect_timer', bfd.detect_timer))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'down_count', bfd.down_count))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'tx_interval', bfd.tx_interval))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'rx_count', bfd.rx_count))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'rx_avg', bfd.rx_avg))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'rx_min', bfd.rx_min))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'rx_max', bfd.rx_max))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'last_rx', bfd.last_rx))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'tx_count', bfd.tx_count))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'tx_avg', bfd.tx_avg))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'tx_min', bfd.tx_min))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'tx_max', bfd.tx_max))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'last_tx', bfd.last_tx))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'app', bfd.app))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'up_time', bfd.up_time))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'version', bfd.version))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'diag', bfd.diag))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'state_bit', bfd.state_bit))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'demand_bit', bfd.demand_bit))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'poll_bit', bfd.poll_bit))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'final_bit', bfd.final_bit))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'multiplier', bfd.multiplier))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'length', bfd.length))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'my_disc', bfd.my_disc))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'your_disc', bfd.your_disc))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'min_tx_interval', bfd.min_tx_interval))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'req_min_rx', bfd.req_min_rx))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'min_echo_interval', bfd.min_echo_interval))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'host_lc', bfd.host_lc))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'down_reason', bfd.down_reason))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'no_host_reason', bfd.no_host_reason))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'parent', bfd.parent))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'per_link_str', bfd.per_link_str))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'auth', bfd.auth))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'auth_bit', bfd.auth_bit))
+        lines.append(format_property(ip, bfd.hostname, bfd.intf, 'print_details', bfd.print_details))
+        lines.append('')
+    return lines
+
+def get_info_from_info_dict(bfd, ip):
+    lines = list()
+    for key in bfd.info:
+        if 'local_disc' not in bfd.info[key]:
+            log.error('skipping. [local_disc] key not found in dictionary {}'.format(bfd.info[key]))
+            return list()
+        local_disc = bfd.info[key]['local_disc']
+        for item in sorted(bfd.info[key]):
+            lines.append(fmt.format(ip, bfd.hostname, local_disc, item, bfd.info[key][item]))
+        lines.append('')
+    return lines
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -77,79 +156,12 @@ def worker(device, vault):
         bfd.ipv6 = True
     bfd.nxapi_init(cfg)
     bfd.refresh()
-
-    if len(bfd.info) == 0:
-        print("{} no bfd neighbors found".format(bfd.hostname))
-        exit(0)
-    else:
-        print('{} {} bfd neighbors'.format(bfd.hostname, len(bfd.info)))
-    key = list(bfd.info.keys())[0]
-    width = get_max_width(bfd.info[key])
-    with lock:
-        # We could use a for loop to cycle through all keys in bfd_info.
-        # Below is just to demonstrate explicit @property access
-        print_head(width)
-        for local_disc in bfd.info:
-            bfd.local_disc = local_disc
-            print_prop(bfd.hostname, bfd.intf, width, 'local_disc', bfd.local_disc)
-            print_prop(bfd.hostname, bfd.intf, width, 'header', bfd.header)
-            print_prop(bfd.hostname, bfd.intf, width, 'vrf_name', bfd.vrf_name)
-            print_prop(bfd.hostname, bfd.intf, width, 'src_ip_addr', bfd.src_ip_addr)
-            print_prop(bfd.hostname, bfd.intf, width, 'src_ipv6_addr', bfd.src_ipv6_addr)
-            print_prop(bfd.hostname, bfd.intf, width, 'dest_ip_addr', bfd.dest_ip_addr)
-            print_prop(bfd.hostname, bfd.intf, width, 'dest_ipv6_addr', bfd.dest_ipv6_addr)
-            print_prop(bfd.hostname, bfd.intf, width, 'remote_disc', bfd.remote_disc)
-            print_prop(bfd.hostname, bfd.intf, width, 'local_state', bfd.local_state)
-            print_prop(bfd.hostname, bfd.intf, width, 'remote_state', bfd.remote_state)
-            print_prop(bfd.hostname, bfd.intf, width, 'holddown', bfd.holddown)
-            print_prop(bfd.hostname, bfd.intf, width, 'cur_detect_mult', bfd.cur_detect_mult)
-            print_prop(bfd.hostname, bfd.intf, width, 'intf', bfd.intf)
-            print_prop(bfd.hostname, bfd.intf, width, 'out_str', bfd.out_str)
-            print_prop(bfd.hostname, bfd.intf, width, 'echo', bfd.echo)
-            print_prop(bfd.hostname, bfd.intf, width, 'echo_tx', bfd.echo_tx)
-            print_prop(bfd.hostname, bfd.intf, width, 'local_diag', bfd.local_diag)
-            print_prop(bfd.hostname, bfd.intf, width, 'demand', bfd.demand)
-            print_prop(bfd.hostname, bfd.intf, width, 'poll', bfd.poll)
-            print_prop(bfd.hostname, bfd.intf, width, 'min_tx', bfd.min_tx)
-            print_prop(bfd.hostname, bfd.intf, width, 'min_rx', bfd.min_rx)
-            print_prop(bfd.hostname, bfd.intf, width, 'local_multi', bfd.local_multi)
-            print_prop(bfd.hostname, bfd.intf, width, 'detect_timer', bfd.detect_timer)
-            print_prop(bfd.hostname, bfd.intf, width, 'down_count', bfd.down_count)
-            print_prop(bfd.hostname, bfd.intf, width, 'tx_interval', bfd.tx_interval)
-            print_prop(bfd.hostname, bfd.intf, width, 'rx_count', bfd.rx_count)
-            print_prop(bfd.hostname, bfd.intf, width, 'rx_avg', bfd.rx_avg)
-            print_prop(bfd.hostname, bfd.intf, width, 'rx_min', bfd.rx_min)
-            print_prop(bfd.hostname, bfd.intf, width, 'rx_max', bfd.rx_max)
-            print_prop(bfd.hostname, bfd.intf, width, 'last_rx', bfd.last_rx)
-            print_prop(bfd.hostname, bfd.intf, width, 'tx_count', bfd.tx_count)
-            print_prop(bfd.hostname, bfd.intf, width, 'tx_avg', bfd.tx_avg)
-            print_prop(bfd.hostname, bfd.intf, width, 'tx_min', bfd.tx_min)
-            print_prop(bfd.hostname, bfd.intf, width, 'tx_max', bfd.tx_max)
-            print_prop(bfd.hostname, bfd.intf, width, 'last_tx', bfd.last_tx)
-            print_prop(bfd.hostname, bfd.intf, width, 'app', bfd.app)
-            print_prop(bfd.hostname, bfd.intf, width, 'up_time', bfd.up_time)
-            print_prop(bfd.hostname, bfd.intf, width, 'version', bfd.version)
-            print_prop(bfd.hostname, bfd.intf, width, 'diag', bfd.diag)
-            print_prop(bfd.hostname, bfd.intf, width, 'state_bit', bfd.state_bit)
-            print_prop(bfd.hostname, bfd.intf, width, 'demand_bit', bfd.demand_bit)
-            print_prop(bfd.hostname, bfd.intf, width, 'poll_bit', bfd.poll_bit)
-            print_prop(bfd.hostname, bfd.intf, width, 'final_bit', bfd.final_bit)
-            print_prop(bfd.hostname, bfd.intf, width, 'multiplier', bfd.multiplier)
-            print_prop(bfd.hostname, bfd.intf, width, 'length', bfd.length)
-            print_prop(bfd.hostname, bfd.intf, width, 'my_disc', bfd.my_disc)
-            print_prop(bfd.hostname, bfd.intf, width, 'your_disc', bfd.your_disc)
-            print_prop(bfd.hostname, bfd.intf, width, 'min_tx_interval', bfd.min_tx_interval)
-            print_prop(bfd.hostname, bfd.intf, width, 'req_min_rx', bfd.req_min_rx)
-            print_prop(bfd.hostname, bfd.intf, width, 'min_echo_interval', bfd.min_echo_interval)
-            print_prop(bfd.hostname, bfd.intf, width, 'host_lc', bfd.host_lc)
-            print_prop(bfd.hostname, bfd.intf, width, 'down_reason', bfd.down_reason)
-            print_prop(bfd.hostname, bfd.intf, width, 'no_host_reason', bfd.no_host_reason)
-            print_prop(bfd.hostname, bfd.intf, width, 'parent', bfd.parent)
-            print_prop(bfd.hostname, bfd.intf, width, 'per_link_str', bfd.per_link_str)
-            print_prop(bfd.hostname, bfd.intf, width, 'auth', bfd.auth)
-            print_prop(bfd.hostname, bfd.intf, width, 'auth_bit', bfd.auth_bit)
-            print_prop(bfd.hostname, bfd.intf, width, 'print_details', bfd.print_details)
-            print('')
+    lines = get_info_from_info_dict(bfd, ip)
+    # collect_info() is another way to retrieve information from NxapiBfdNeighbors()
+    # We include it here as an example of pulling a subset of info. Replace
+    # get_info_from_info_dict() with collect_info() to test it.
+    # lines = collect_info(ip, bfd)
+    return lines
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -157,8 +169,12 @@ vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
 
-lock = Lock()
 devices = get_device_list()
+fmt = '{:<15} {:<18} {:<15} {:<20} {:<15}'
+print_header()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
