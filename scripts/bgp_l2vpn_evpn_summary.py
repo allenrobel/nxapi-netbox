@@ -17,11 +17,11 @@ Sample output
 
 %
 '''
-our_version = 102
+our_version = 103
 script_name = 'bgp_l2vpn_evpn_summary'
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -72,7 +72,15 @@ def collect_bgp_l2vpn_evpn_summary(ip, nx):
     lines.append(fmt.format(ip, nx.hostname, 'total_networks', nx.totalnetworks))
     lines.append(fmt.format(ip, nx.hostname, 'total_paths', nx.totalpaths))
     lines.append('{}'.format(' '))
-    output[ip] = lines
+    return lines
+
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -80,7 +88,7 @@ def worker(device, vault):
     nx.nxapi_init(cfg)
     nx.vrf = cfg.vrf
     nx.refresh()
-    collect_bgp_l2vpn_evpn_summary(ip, nx)
+    return collect_bgp_l2vpn_evpn_summary(ip, nx)
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -90,13 +98,10 @@ nb = netbox(vault)
 
 fmt = '{:<4} {:<14} {:<16} {:>10}'
 devices = get_device_list()
-# keyed on sid, value is a list containing the worker's output
-output = dict()
-lock = Lock()
+
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join()
-for ip in sorted(output):
-    for line in output[ip]:
-        print('{}'.format(line))
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
