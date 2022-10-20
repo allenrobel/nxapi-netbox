@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 104
+our_version = 105
 '''
 Name: forwarding_consistency.py
 Description: NXAPI: start and display results for forwarding consistency checker
@@ -8,7 +8,7 @@ script_name = 'forwarding_consistency'
 
 # standard libraries
 import argparse
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 from time import sleep
 # local libraries
 from args.args_cookie import ArgsCookie
@@ -61,6 +61,14 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def run_config(ip, vault, cmd):
     nx = NxapiConfig(vault.nxos_username, vault.nxos_password, ip, log)
     cfg = list()
@@ -77,23 +85,19 @@ def run_command(ip, vault, cmd):
 
 def log_result_ipv4(device, ip, result):
     if 'run_status' not in result:
-        log.error('{} ({}) IPV4 -> {}'.format(device, ip, result))
-        return
+        return 'ERROR: {} ({}) IPV4 -> {}'.format(device, ip, result)
     run_status = result['run_status'].strip()
     if 'PASS' not in run_status:
-        log.warning('{} ({}) IPV4 -> {}'.format(device, ip, result))
-        return
-    log.info('{} ({}) IPV4 -> {}'.format(device, ip, run_status))
+        return 'WARNING: {} ({}) IPV4 -> {}'.format(device, ip, result)
+    return '{} ({}) IPV4 -> {}'.format(device, ip, run_status)
 
 def log_result_ipv6(device, ip, result):
     if 'run_status' not in result:
-        log.error('{} ({}) IPV6 -> {}'.format(device, ip, result))
-        return
+        return 'ERROR: {} ({}) IPV6 -> {}'.format(device, ip, result)
     run_status = result['run_status'].strip()
     if 'PASS' not in run_status:
-        log.warning('{} ({}) IPV6 -> {}'.format(device, ip, result))
-        return
-    log.info('{} ({}) IPV6 -> {}'.format(device, ip, run_status))
+        return 'WARNING: {} ({}) IPV6 -> {}'.format(device, ip, result)
+    return '{} ({}) IPV6 -> {}'.format(device, ip, run_status)
 
 def clear_consistency_results(ip, vault):
     '''
@@ -106,12 +110,12 @@ def start_consistency_test_ipv4(ip, vault):
 def start_consistency_test_ipv6(ip, vault):
     result = run_config(ip, vault, 'test forwarding ipv6 unicast inconsistency')
 
-def display_results_ipv4(device, ip, vault):
+def get_results_ipv4(device, ip, vault):
     result = run_command(ip, vault, 'show forwarding ipv4 unicast inconsistency')
-    log_result_ipv4(device, ip, result)
-def display_results_ipv6(device, ip, vault):
+    return log_result_ipv4(device, ip, result)
+def get_results_ipv6(device, ip, vault):
     result = run_command(ip, vault, 'show forwarding ipv6 unicast inconsistency')
-    log_result_ipv6(device, ip, result)
+    return log_result_ipv6(device, ip, result)
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -120,10 +124,12 @@ def worker(device, vault):
     if cfg.ipv6 == True:
         start_consistency_test_ipv6(ip, vault)
     sleep(float(cfg.time))
-    display_results_ipv4(device, ip, vault)
+    lines = list()
+    lines.append(get_results_ipv4(device, ip, vault))
     if cfg.ipv6 == True:
-        display_results_ipv6(device, ip, vault)
-    print()
+        lines.append(get_results_ipv6(device, ip, vault))
+    lines.append('')
+    return lines
 
 def verify_args():
     try:
@@ -142,8 +148,9 @@ nb = netbox(vault)
 
 devices = get_device_list()
 log.info('Please wait...this could take a couple minutes.')
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join()
-
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
