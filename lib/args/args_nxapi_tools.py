@@ -12,13 +12,15 @@ Contains common arguments for scripts in the nxapi-tools repo
 # standard libraries
 import argparse
 help_devices = 'Comma-separated (no spaces) list of device names to query.'
+help_loglevel = "Script's logging level. Options (case insensitive): DEBUG, INFO, WARNING, ERROR, CRITICAL."
 help_vault = 'The vault to use. Valid values: ansible, hashicorp.'
 help_vrf = 'The vrf in which to retrieve information.'
 
 ex_prefix = ' Example: '
-ex_vrf = '{} --vrf TENANT1'.format(ex_prefix)
 ex_devices = '{} --devices leaf_1,spine_3,pathway'.format(ex_prefix)
+ex_loglevel = '{} --loglevel DEBUG'.format(ex_prefix)
 ex_vault = '{} --vault hashicorp'.format(ex_prefix)
+ex_vrf = '{} --vrf TENANT1'.format(ex_prefix)
 
 ArgsNxapiTools = argparse.ArgumentParser(add_help=False, description='placeholder')
 optional = ArgsNxapiTools.add_argument_group(title='OPTIONAL SCRIPT ARGS')
@@ -28,6 +30,12 @@ mandatory.add_argument('--devices',
                      dest='devices',
                      required=True,
                      help='{} {}'.format(help_devices, ex_devices))
+
+optional.add_argument('--loglevel',
+                     dest='loglevel',
+                     required=False,
+                     default='ERROR',
+                     help='(default: {}) {} {}'.format('%(default)s', help_loglevel, ex_loglevel))
 
 optional.add_argument('--vault',
                      dest='vault',
