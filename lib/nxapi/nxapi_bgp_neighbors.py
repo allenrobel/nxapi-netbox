@@ -274,6 +274,9 @@ class NxapiBgpNeighbors(NxapiBase):
             we handle this by testing to see if af-name is an ipv6 address and, if so, change 
             the value to 'IPv6 Unicast', which is what more recent images return
             '''
+            if _saf_value in ['IPv4 Unicast', 'VPNv4 Unicast', 'IPv6 Unicast']:
+                # If the saf_value is legit, return immediately to avoid error logs from is_ipv6_address
+                return
             if self.verify.is_ipv6_address(_saf_value):
                 self.log.debug('{} older image. {} is ipv6 address {}, change value to IPv6 Unicast'.format(
                     self.hostname,
