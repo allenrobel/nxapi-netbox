@@ -138,6 +138,11 @@ def collect_info(ip, bfd):
     return lines
 
 def get_info_from_info_dict(bfd, ip):
+    '''
+    bfd.info is a dict containing all bfd information.  It's keyed on local_disc and the values are 
+    dictionaries containing information for each bfd instance.  See collect_info() in this script
+    for how to access individual properties.
+    '''
     lines = list()
     for key in bfd.info:
         if 'local_disc' not in bfd.info[key]:
