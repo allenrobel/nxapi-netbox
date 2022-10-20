@@ -7,13 +7,13 @@ Example:
 
 watch ./bfd_neighbor_state.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2
 '''
-our_version = 104
+our_version = 105
 script_name = 'bfd_neighbor_state'
 
 # standard libraries
 import argparse
-#from time import sleep
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
+from gc import collect
 
 # local libraries
 from args.args_cookie import ArgsCookie
@@ -42,32 +42,46 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_header():
+    print(fmt.format(
+        'DUT',
+        'local_disc',
+        'local_port',
+        'src_ip_addr',
+        'dest_ip_addr',
+        'local_state',
+        'remote_state'))
+
+def collect_info(ip, bfd):
+    lines = list()
+    for local_disc in bfd.info:
+        bfd.local_disc = local_disc
+        lines.append(fmt.format(
+            bfd.hostname,
+            local_disc,
+            bfd.intf,
+            bfd.src_ip_addr,
+            bfd.dest_ip_addr,
+            bfd.local_state,
+            bfd.remote_state))
+    lines.append('')
+    return lines
+
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
     bfd = NxapiBfdNeighbors(vault.nxos_username, vault.nxos_password, ip, log)
     bfd.nxapi_init(cfg)
-
     bfd.refresh()
-    with lock:
-        print(fmt.format(
-            'DUT',
-            'local_disc',
-            'local_port',
-            'src_ip_addr',
-            'dest_ip_addr',
-            'local_state',
-            'remote_state'))
-        for local_disc in bfd.info:
-            bfd.local_disc = local_disc
-            print(fmt.format(
-                bfd.hostname,
-                local_disc,
-                bfd.intf,
-                bfd.src_ip_addr,
-                bfd.dest_ip_addr,
-                bfd.local_state,
-                bfd.remote_state))
-        print('')
+    lines = collect_info(ip, bfd)
+    return lines
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -78,11 +92,11 @@ nb = netbox(vault)
 fmt = '{:<15} {:<10} {:<15} {:<13} {:<13} {:<12} {:<12}'
 
 devices = get_device_list()
-# if len(devices) > 1:
-#     log.error('exiting. Unlike most scripts in this repo, this script supports only one device.')
-#     exit(1)
 
-lock = Lock()
+print_header()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
