@@ -3,16 +3,21 @@
 Name: interface_errors.py
 Summary: NXAPI: display non-zero interface error counters
 
-Synopsis:
+Example output:
 
-./nxapi_interface_errors_sid.py --vault hashicorp --devices leaf_1,leaf_2
+% ./interface_errors.py --vault hashicorp --devices cvd_l2_fanout,cvd_leaf_1                                              
+ip              hostname           interface             value type           
+192.168.11.116  cvd_l2_911         Ethernet1/17           9821 eth_inerr      
+192.168.11.116  cvd_l2_911         Ethernet1/17           9820 eth_crc        
+
+% 
 '''
-our_version = 103
+our_version = 104
 script_name = 'interface_errors'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -41,10 +46,19 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def print_header():
     print(fmt.format('ip', 'hostname', 'interface', 'value', 'type'))
 
-def print_info(ip, i):
+def collect_info(ip, i):
+    lines = list()
     for interface in i.interface_list:
         i.interface = interface
         errors = i.errors
@@ -55,7 +69,10 @@ def print_info(ip, i):
             # skip zero and -1 values
             if errors[error] <= 0:
                 continue
-            print(fmt.format(ip, i.hostname, i.interface, errors[error], error))
+            lines.append(fmt.format(ip, i.hostname, i.interface, errors[error], error))
+    if len(lines) != 0:
+        lines.append('')
+    return lines
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -64,8 +81,7 @@ def worker(device, vault):
     result = i.refresh()
     if not result:
         return
-    with lock:
-        print_info(ip, i)
+    return collect_info(ip, i)
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -74,11 +90,12 @@ vault.fetch_data()
 nb = netbox(vault)
 
 devices = get_device_list()
-
 fmt = '{:<15} {:<18} {:<15} {:>11} {:<15}'
 print_header()
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
