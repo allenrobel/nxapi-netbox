@@ -3,12 +3,11 @@
 Name: bgp_neighbor_l2vpn_evpn_prefix_received.py
 Description: NXAPI: display bgp l2vpn evpn summary info
 '''
-our_version = 102
+our_version = 103
 script_name = 'bgp_neighbor_l2vpn_evpn_prefix_received'
 # standard libraries
 import argparse
-from threading import Thread, Lock
-from time import sleep
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -49,6 +48,14 @@ def get_device_list():
 def print_header():
     print(fmt.format('ip', 'hostname', 'l2vpn_evpn_neighbor', 'prefix_rx'))
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def collect_prefix_rx(ip, bgp):
     lines = list()
     for neighbor in bgp.neighbor_info:
@@ -61,7 +68,8 @@ def collect_prefix_rx(ip, bgp):
         if prefixreceived == 0 and cfg.nonzero == True:
             continue
         lines.append(fmt.format(ip, bgp.hostname, bgp.neighbor, bgp.prefixreceived))
-    output[ip] = lines
+    lines.append('')
+    return lines
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -69,27 +77,22 @@ def worker(device, vault):
     i.nxapi_init(cfg)
     i.vrf = cfg.vrf
     i.refresh()
-    collect_prefix_rx(ip, i)
+    return collect_prefix_rx(ip, i)
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
-# keyed on ip address, value is a list containing the worker's output
-output = dict()
 
 devices = get_device_list()
 
 fmt = '{:<15} {:<20} {:<19} {:>9}'
 print_header()
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join(timeout=5)
-for ip in sorted(output):
-    for line in output[ip]:
-        print('{}'.format(line))
-    print()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
