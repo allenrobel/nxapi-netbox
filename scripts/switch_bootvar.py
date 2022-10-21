@@ -5,15 +5,15 @@ script_name = 'switch_bootvar'
 Name: switch_bootvar.py
 Description: NXAPI: display current bootvar info
 
-If not specified, --sup_instance defaults to 1
+If not specified, --sup_instance defaults to 1:
 
 ./switch_bootvar.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2
 
-Explictly specifying sup_instance
+Explictly specifying sup_instance:
 
 ./switch_bootvar.py --vault hashicorp --devices cvd_bgw_1,cvd_bgw_2 --sup_instance 2
 
-Example output
+Example output:
 
 % ./switch_bootvar.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2,cvd_bgw_1
 ip              hostname             sup poap_status current_image                            startup_image                           
