@@ -1,6 +1,6 @@
 ## nxapi-netbox
 
-This repo contains scripts and libraries to interact with Cisco NX-OS switches over NXAPI.
+This repo contains scripts and libraries to interact with Cisco NX-OS switches over NXAPI.  NX-OS and Netbox Credentials are obtained through either Hashicorp Vault or Ansible Vault.  Device names are resolved to IP addresses using Netbox.  In the future, we hope to add more functionality using e.g. Netbox Roles and/or Tags.  For example, display nve neighbors for all devices with Role == Leaf and tag == fabric1.
 
 ![Data Flow]( assets/nxapi-netbox-data-flow.png)
 
