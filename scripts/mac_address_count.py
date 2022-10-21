@@ -2,13 +2,21 @@
 '''
 Name: mac_address_count.py
 Description: NXAPI: display mac address-table count
+
+Example output:
+
+% ./mac_address_count.py --vault hashicorp --devices cvd_leaf_1,cvd_l2_fanout
+ip              device             vlan   total     dyn     otv rvtep  static  secure
+192.168.11.102  cvd-1311-leaf       all       9       3       6     0       0       0
+192.168.11.116  cvd_l2_911          all      25      25       0     0       0       0
+% 
 '''
-our_version = 105
+our_version = 106
 script_name = 'mac_address_count'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -47,6 +55,14 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def verify_vlan(ip, vault):
     if cfg.vlan == 0:
         return True
@@ -64,8 +80,9 @@ def print_header():
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
+    lines = list()
     if not verify_vlan(ip, vault):
-        return
+        return lines
     nx = NxapiMacCount(vault.nxos_username, vault.nxos_password, ip, log)
     nx.nxapi_init(cfg)
     nx.vlan = cfg.vlan
@@ -74,17 +91,17 @@ def worker(device, vault):
         vlan = 'all'
     else:
         vlan = nx.vlan
-    with lock:
-        print(fmt.format(
-            ip,
-            nx.hostname,
-            vlan,
-            nx.total_cnt,
-            nx.dyn_cnt,
-            nx.otv_cnt,
-            nx.rvtep_static_cnt,
-            nx.static_cnt,
-            nx.secure_cnt))
+    lines.append(fmt.format(
+        ip,
+        nx.hostname,
+        vlan,
+        nx.total_cnt,
+        nx.dyn_cnt,
+        nx.otv_cnt,
+        nx.rvtep_static_cnt,
+        nx.static_cnt,
+        nx.secure_cnt))
+    return lines
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -96,7 +113,10 @@ devices = get_device_list()
 
 fmt = '{:<15} {:<18} {:>4} {:>7} {:>7} {:>7} {:>5} {:>7} {:>7}'
 print_header()
-lock = Lock()
+
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
