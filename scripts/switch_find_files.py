@@ -12,13 +12,36 @@ NOTES:
 
    --target bootflash: (find files matching --find <string> only in the root directory of bootflash:)
    --target bootflash:/.rpmstore/config/etc (find files matching --find <string> only in bootflash:/.rpmstore/config/etc)
+
+Example output:
+% ./switch_find_files.py --vault hashicorp --devices cvd_spine_1,cvd_bgw_4,cvd_leaf_3 --find cfg
+--------------------------------------------------
+192.268.11.112 - cvd-1211-spine
+Target: bootflash:/
+    filename                               size date                
+    zmi_201.cfg                           29234 Jul 10 18:47:26 2018
+    opt_cfg.txt                           29371 Aug 21 18:12:58 2018
+--------------------------------------------------
+192.268.11.101 - cvd-2112-bgw
+Target: bootflash:/
+    filename                               size date                
+    cfg                                   32431 Feb 20 21:45:29 2020
+    netflow.cfg                             817 Aug 03 21:32:56 2020
+--------------------------------------------------
+192.268.11.104 - cvd-1313-leaf
+Target: bootflash:/
+    filename                               size date                
+    arp.cfg                               16081 Jul 25 23:10:33 2022
+--------------------------------------------------
+% 
+
 '''
-our_version = 105
+our_version = 106
 script_name = 'switch_find_files'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -65,6 +88,14 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
     d = NxapiDir(vault.nxos_username, vault.nxos_password, ip, log)
@@ -72,24 +103,17 @@ def worker(device, vault):
     d.target = cfg.target
     d.refresh()
 
-    op = list()
-    op.append('Hostname {}'.format(d.hostname))
-    op.append('IP: {}'.format(ip))
-    op.append('Target: {}'.format(d.target))
-    op.append(fmt.format('filename', 'size', 'date'))
-    matches = list()
-    found = False
+    lines = list()
+    lines.append('{} - {}'.format(ip, d.hostname))
+    lines.append('Target: {}'.format(d.target))
+    lines.append(fmt.format('filename', 'size', 'date'))
     for key in d.files:
         if cfg.find not in d.files[key]['fname']:
             continue
-        found = True
-        op.append(fmt.format(d.files[key]['fname'], d.files[key]['fsize'], d.files[key]['timestring']))
-
-    if found == True:
-        with lock:
-            for line in op:
-                print(line)
-            print(separator)
+        lines.append(fmt.format(d.files[key]['fname'], d.files[key]['fsize'], d.files[key]['timestring']))
+    if len(lines) != 0:
+        lines.append(separator)
+    return lines
 
 separator = '-' * 50
 print(separator)
@@ -104,8 +128,9 @@ devices = get_device_list()
 
 fmt = '    {:<30} {:>12} {:<20}'
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
-    t.join()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
