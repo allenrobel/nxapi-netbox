@@ -18,12 +18,12 @@ ip              hostname           serial       name                 description
 % 
 
 '''
-our_version = 109
+our_version = 110
 script_name = 'serial_numbers'
 
 #standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -54,6 +54,16 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+        if len(output) > 0:
+            print()
+
 def print_header():
     print(fmt.format('ip', 'hostname', 'serial', 'name', 'description'))
 
@@ -62,10 +72,15 @@ def worker(device, vault):
     nx = NxapiInventory(vault.nxos_username, vault.nxos_password, ip, log)
     nx.nxapi_init(cfg)
     nx.refresh()
-    d = nx.info
-    with lock:
-        for item in d:
-            print(fmt.format(ip, nx.hostname, d[item]['serialnum'], d[item]['name'], d[item]['desc']))
+    lines = list()
+    for item in nx.info:
+        lines.append(fmt.format(
+            ip,
+            nx.hostname, 
+            nx.info[item]['serialnum'],
+            nx.info[item]['name'],
+            nx.info[item]['desc']))
+    return lines
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -77,7 +92,9 @@ devices = get_device_list()
 
 fmt = '{:<15} {:<18} {:<12} {:<20} {:<25}'
 print_header()
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
