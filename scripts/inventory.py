@@ -4,11 +4,10 @@ Name: inventory.py
 Description: NXAPI: display "show inventory" info
 '''
 script_name = 'inventory'
-our_version = 100
+our_version = 101
 # standard libraries
 import argparse
-from threading import Thread, Lock
-
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -37,6 +36,16 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+        if len(output) > 0:
+            print()
+
 def print_header():
     print(fmt.format('ip', 'hostname', 'serial', 'name', 'product_id', 'description'))
 
@@ -49,18 +58,17 @@ def worker(device, vault):
     i.nxapi_init(cfg)
     i.refresh()
     d = i.info
-    with lock:
-        for item in d:
-            i.item = item
-            print(fmt.format(
-                ip,
-                i.hostname,
-                i.serialnum,
-                i.name,
-                i.productid,
-                i.desc))
-        print()
-
+    lines = list()
+    for item in d:
+        i.item = item
+        lines.append(fmt.format(
+            ip,
+            i.hostname,
+            i.serialnum,
+            i.name,
+            i.productid,
+            i.desc))
+    return lines
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -73,7 +81,9 @@ devices = get_device_list()
 fmt = '{:<15} {:<18} {:<12} {:<15} {:<18} {:<30}'
 print_header()
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
