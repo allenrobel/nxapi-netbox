@@ -1,27 +1,36 @@
 #!/usr/bin/env python3
-our_version = 106
+our_version = 107
 script_name = 'rib_summary'
 '''
 Name: rib_summary.py
 Description: NXAPI: display ipv4/ipv6 RIB summary 
 
-Example usage:
+Example output:
 
-All options can be combined.
-By default, each option is NOT enabled.  So, using only --vault and --devices will print nothing.
-Usage examples:
-    --ipv6 --total                                                       - print totals for ipv6 routes and paths
-    --ipv6 --total --vrf TENANT1                                         - print totals for ipv6 routes and paths in vrf TENANT1
-    --ipv4 --prefixes                                                    - print prefix distribution for ipv4 routes
-    --ipv4 --summary --best                                              - print summary for ipv4 best paths
-    --ipv6 --summary --backup                                            - print summary for ipv6 backup paths
-    --ipv6 --ipv4 --total --summary --backup --best --prefixes --vrf FOO - print everything for vrf FOO
+% ./rib_summary.py --vault hashicorp --devices cvd_leaf_1 --ipv4            
 
-./rib_summary.py --vault hashicorp --ipv4 --ipv6 --total --summary --prefixes --best --backup --devices cvd_leaf_1,cvd_leaf_2
+TOTALS 172.22.150.102 cvd-1311-leaf
+   vrf        ver routes  paths  
+   default      4 84      169    
+
+ROUTE TYPE SUMMARY 172.22.150.102 cvd-1311-leaf
+   vrf        ver path_type      am   local  direct discard   bcast     bgp
+   default      4 best            4       7       7      -1      11      -1
+   default      4 backup         -1      -1      -1      -1      -1      -1
+
+PREFIX SUMMARY 172.22.150.102 cvd-1311-leaf
+   vrf        ver prefixlen value
+   default      4 8         1    
+   default      4 30        48   
+   default      4 32        35   
+
+% 
 
 NOTES:
 
-1. If a JSON object is missing from the switch's reply, we silently ignore the object.
+1. If neither --ipv4 nor --ipv6 are provided, the script defaults to --ipv4
+
+2. If a JSON object is missing from the switch's reply, we silently ignore the object.
    This typically happens for backup routes when backup paths are not configured on 
    the switch.  A debug log is printed though, so if you have log-level set to DEBUG
    for file logging you'll find this in the log. e.g. if the following is configured
@@ -35,7 +44,7 @@ NOTES:
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -46,29 +55,11 @@ from vault.vault import get_vault
 from nxapi.nxapi_rib_summary import NxapiRibSummaryIpv4, NxapiRibSummaryIpv6
 
 def get_parser():
-    help_backup = 'display backup path routes'
-    ex_backup = ' Example: --backup'
-
-    help_best = 'display best path routes'
-    ex_best = ' Example: --best'
-
-    help_ipv4 = 'display ipv4 routes'
+    help_ipv4 = 'display ipv4 routes. can be used together with --ipv6'
     ex_ipv4 = ' Example: --ipv4'
 
-    help_ipv6 = 'display ipv6 routes'
+    help_ipv6 = 'display ipv6 routes. can be used together with --ipv4'
     ex_ipv6 = ' Example: --ipv6'
-
-    help_prefixes = 'display prefix summaries'
-    ex_prefixes = ' Example: --prefixes'
-
-    help_total = 'display total routes'
-    ex_total = ' Example: --total'
-
-    help_summary = 'display summary of routes by route type e.g. am, direct, bgp, etc'
-    ex_summary = ' Example: --summary'
-
-    help_vrf = 'vrf in which to query ip route summary info'
-    ex_vrf = ' Example: --vrf TENANT_1'
 
     parser = argparse.ArgumentParser(
         description='DESCRIPTION: NXAPI: display ipv4/ipv6 RIB summary',
@@ -90,41 +81,6 @@ def get_parser():
                          default=False,
                          help='{} {}'.format(help_ipv6, ex_ipv6))
 
-    optional.add_argument('--best',
-                         dest='best',
-                         required=False,
-                         action='store_true',
-                         default=False,
-                         help='{} {}'.format(help_best, ex_best))
-
-    optional.add_argument('--backup',
-                         dest='backup',
-                         required=False,
-                         action='store_true',
-                         default=False,
-                         help='{} {}'.format(help_backup, ex_backup))
-
-    optional.add_argument('--total',
-                         dest='total',
-                         required=False,
-                         action='store_true',
-                         default=False,
-                         help='{} {}'.format(help_total, ex_total))
-
-    optional.add_argument('--summary',
-                         dest='summary',
-                         required=False,
-                         action='store_true',
-                         default=False,
-                         help='{} {}'.format(help_summary, ex_summary))
-
-    optional.add_argument('--prefixes',
-                         dest='prefixes',
-                         required=False,
-                         action='store_true',
-                         default=False,
-                         help='{} {}'.format(help_prefixes, ex_prefixes))
-
     parser.add_argument('--version',
                         action='version',
                         version='{} v{}'.format('%(prog)s', our_version))
@@ -137,16 +93,57 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
-def print_header_summary():
-    print()
-    print(fmt_summary.format('ip', 'hostname', 'vrf', 'ver', 'path_type', 'am', 'local', 'direct', 'discard', 'bcast', 'bgp'))
+def print_output(futures):
+    # if nothing is printed, display some help
+    count = 0
+    for future in futures:
+        count += len(future.result())
+    if count == 0:
+        example_usage()
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+        if len(output) > 0:
+            print()
 
-def print_values_summary_best(ip, i):
-    if cfg.best == False:
-        return
-    print(fmt_summary.format(
-        ip,
-        i.hostname,
+def example_usage():
+    print('Usage examples:')
+    print('   --ipv6 - print RIB information for ipv6')
+    print('   --ipv4 - print RIB information for ipv4')
+    exit(0)
+
+# prefixes
+def get_header_prefixes():
+    return fmt_prefixes.format('vrf', 'ver', 'prefixlen', 'value')
+def get_values_prefixes(i):
+    lines = list()
+    for prefix in i.prefix_list:
+        i.prefixlen = prefix
+        lines.append(fmt_prefixes.format(i.vrf, i.ip_version, i.prefixlen, i.prefix))
+    return lines
+def worker_prefixes(i):
+    lines = list()
+    for line in get_values_prefixes(i):
+        lines.append(line)
+    return lines
+
+# total
+def get_header_total():
+    return fmt_total.format('vrf', 'ver', 'routes' , 'paths')
+def get_values_total(i):
+    return fmt_total.format(i.vrf, i.ip_version, i.routes, i.paths)
+def worker_total(i):
+    lines = list()
+    lines.append(get_values_total(i))
+    return lines
+
+# summary
+def get_values_summary_best(i):
+    lines = list()
+    lines.append(fmt_summary.format(
         i.vrf,
         i.ip_version,
         'best',
@@ -156,14 +153,11 @@ def print_values_summary_best(ip, i):
         i.discard_best,
         i.broadcast_best,
         i.bgp_best))
+    return lines
 
-def print_values_summary_backup(ip, i):
-    log.info('got cfg.backup {}'.format(cfg.backup))
-    if cfg.backup != False:
-        return
-    print(fmt_summary.format(
-        ip,
-        i.hostname,
+def get_values_summary_backup(i):
+    lines = list()
+    lines.append(fmt_summary.format(
         i.vrf,
         i.ip_version,
         'backup',
@@ -173,34 +167,17 @@ def print_values_summary_backup(ip, i):
         i.discard_backup,
         i.broadcast_backup,
         i.bgp_backup))
+    return lines
 
-def print_header_prefixes():
-    print()
-    print(fmt_prefixes.format('ip', 'hostname', 'vrf', 'ver', 'prefixlen', 'value'))
-
-def print_values_prefixes(ip, i):
-    for prefix in i.prefix_list:
-        i.prefixlen = prefix
-        print(fmt_prefixes.format(ip, i.hostname, i.vrf, i.ip_version, i.prefixlen, i.prefix))
-
-def print_header_total():
-    print()
-    print(fmt_total.format('ip', 'hostname', 'vrf', 'ver', 'routes' , 'paths'))
-
-def print_values_total(ip, i):
-        print(fmt_total.format(ip, i.hostname, i.vrf, i.ip_version, i.routes, i.paths))
-
-def worker_total(ip, i):
-    print_values_total(ip, i)
-
-def worker_prefixes(ip, i):
-    print_values_prefixes(ip, i)
-
-def worker_summary(ip, i):
-    if cfg.best:
-        print_values_summary_best(ip, i)
-    if cfg.backup:
-        print_values_summary_backup(ip, i)
+def get_header_summary():
+    return fmt_summary.format('vrf', 'ver', 'path_type', 'am', 'local', 'direct', 'discard', 'bcast', 'bgp')
+def worker_summary(i):
+    lines = list()
+    for line in get_values_summary_best(i):
+        lines.append(line)
+    for line in get_values_summary_backup(i):
+        lines.append(line)
+    return lines
 
 def get_instance_list(ip, vault):
     instances = list()
@@ -212,34 +189,54 @@ def get_instance_list(ip, vault):
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
-
+    lines = list()
     for i in get_instance_list(ip, vault):
         i.nxapi_init(cfg)
         i.vrf = cfg.vrf
         i.refresh()
-        with lock:
-            if cfg.total:
-                print_header_total()
-                worker_total(ip, i)
-            if cfg.summary:
-                print_header_summary()
-                worker_summary(ip, i)
-            if cfg.prefixes:
-                print_header_prefixes()
-                worker_prefixes(ip, i)
+        x = worker_total(i)
+        if len(x) != 0:
+            lines.append('')
+            lines.append('TOTALS {} {}'.format(ip, i.hostname))
+            lines.append(get_header_total())
+            for line in x:
+                lines.append(line)
+        x = worker_summary(i)
+        if len(x) != 0:
+            lines.append('')
+            lines.append('ROUTE TYPE SUMMARY {} {}'.format(ip, i.hostname))
+            lines.append(get_header_summary())
+            for line in x:
+                lines.append(line)
+        x = worker_prefixes(i)
+        if len(x) != 0:
+            lines.append('')
+            lines.append('PREFIX SUMMARY {} {}'.format(ip, i.hostname))
+            lines.append(get_header_prefixes())
+            for line in x:
+                lines.append(line)
+    return lines
+
+def verify_args(cfg):
+    # Default to ipv4 if no options are present.
+    if cfg.ipv4 == False and cfg.ipv6 == False:
+        cfg.ipv4 = True
 
 cfg = get_parser()
+verify_args(cfg)
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
 
 devices = get_device_list()
-fmt_summary = '{:<15} {:<25} {:<10} {:>3} {:<9} {:>7} {:>7} {:>7} {:>7} {:>7} {:>7}'
-fmt_prefixes = '{:<15} {:<25} {:<10} {:>3} {:<9} {:<5}'
-fmt_total = '{:<15} {:<25} {:<10} {:>3} {:<7} {:<7}'
+fmt_summary = '   {:<10} {:>3} {:<9} {:>7} {:>7} {:>7} {:>7} {:>7} {:>7}'
+fmt_prefixes = '   {:<10} {:>3} {:<9} {:<5}'
+fmt_total = '   {:<10} {:>3} {:<7} {:<7}'
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
