@@ -3,18 +3,24 @@
 Name: interface_packet_rates.py
 Description: NXAPI: display interface input/output packet rates for a set of interfaces
 
-Example usage:
+Example output:
 
-./nxapi_interface_packet_rates.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2 --interfaces Eth1/1,Eth1/2
+% ./interface_packet_rates.py --vault hashicorp --devices cvd_l2_fanout --interfaces Eth1/17,Eth1/18,Eth1/19           
+192.168.11.116  cvd_l2_911         Eth1/17                947283  output packet rate
+192.168.11.116  cvd_l2_911         Eth1/17               1689334  input packet rate 
+192.168.11.116  cvd_l2_911         Eth1/18               1689206  output packet rate
+192.168.11.116  cvd_l2_911         Eth1/18                     0  input packet rate 
+192.168.11.116  cvd_l2_911         Eth1/19                947262  output packet rate
+192.168.11.116  cvd_l2_911         Eth1/19               2534000  input packet rate 
 
+%
 '''
-our_version = 106
-script_name = 'nxapi_interface_packet_rates'
+our_version = 107
+script_name = 'interface_packet_rates'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
-from os import path
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -58,23 +64,34 @@ def get_interface_list():
         log.error('exiting. Cannot parse --interfaces {}.  Example usage: --interfaces Eth1/1,Eth1/2'.format(cfg.interfaces))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+        if len(output) > 0:
+            print()
+
+def collect_output(ip, nx):
+    lines = list()
+    lines.append(fmt.format(ip, nx.hostname, nx.interface, nx.info['eth_outrate1_pkts'], 'output packet rate'))
+    lines.append(fmt.format(ip, nx.hostname, nx.interface, nx.info['eth_inrate1_pkts'], 'input packet rate'))
+    return lines
 def worker(device, vault, interfaces):
     ip = get_device_mgmt_ip(nb, device)
-
-    i = NxapiInterface(vault.nxos_username, vault.nxos_password, ip, log)
-    i.nxapi_init(cfg)
-    with lock:
-        for interface in interfaces:
-            i.interface = interface
-            result = i.refresh()
-            if not result:
-                return
-            eth_outrate1_pkts = i.info['eth_outrate1_pkts']
-            eth_inrate1_pkts = i.info['eth_inrate1_pkts']
-            print(fmt.format(i.hostname, interface, eth_outrate1_pkts, 'output packet rate'))
-            print(fmt.format(i.hostname, interface, eth_inrate1_pkts, 'input packet rate'))
-        print()
-
+    nx = NxapiInterface(vault.nxos_username, vault.nxos_password, ip, log)
+    nx.nxapi_init(cfg)
+    lines = list()
+    for interface in interfaces:
+        nx.interface = interface
+        result = nx.refresh()
+        if not result:
+            return
+        for line in collect_output(ip, nx):
+            lines.append(line)
+    return lines
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -85,8 +102,11 @@ nb = netbox(vault)
 devices = get_device_list()
 interfaces = get_interface_list()
 
-fmt = '{:<6} {:<7} {:>10}  {:<18}'
-lock = Lock()
+fmt = '{:<15} {:<18} {:<18} {:>10}  {:<18}'
+
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault, interfaces))
-    t.start()
+    args = [device, vault, interfaces]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
