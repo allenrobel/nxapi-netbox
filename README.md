@@ -52,7 +52,7 @@ Script                                       | Description
 [switch_version]                             | NXAPI: display NXOS version information
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
 [test_vault_hashicorp]                       | Verify that HashiCorp Vault is working and contains the keys required by scripts in this repo
-
+[vrf]                                        | NXAPI: display vrfs
 
 
 The scripts use Netbox (currently only for name resolution, but likely for more later...).
@@ -255,3 +255,4 @@ netbox_url: http://mynetbox.foo.com'
 [switch_version]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_version.py
 [test_vault_ansible]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_ansible.py
 [test_vault_hashicorp]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_hashicorp.py
+[vrf]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/vrf.py
