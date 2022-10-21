@@ -48,6 +48,7 @@ Script                                       | Description
 [switch_bootvar]                             | NXAPI: display current bootvar info
 [switch_find_files]                          | NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices
 [switch_reload]                              | NXAPI: reload (or install reset) one or more NX-OS devices
+[switch_reset_reason]                        | NXAPI: display NXOS reset reason and time last reset
 [switch_version]                             | NXAPI: display NXOS version information
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
 [test_vault_hashicorp]                       | Verify that HashiCorp Vault is working and contains the keys required by scripts in this repo
