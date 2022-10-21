@@ -251,6 +251,7 @@ netbox_url: http://mynetbox.foo.com'
 [switch_bootvar]:  https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_bootvar.py
 [switch_find_files]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_find_files.py
 [switch_reload]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reload.py
+[switch_reset_reason]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reset_reason.py
 [switch_version]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_version.py
 [test_vault_ansible]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_ansible.py
 [test_vault_hashicorp]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_hashicorp.py
