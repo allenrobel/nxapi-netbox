@@ -43,6 +43,7 @@ Script                                       | Description
 [locator_led_status]                         | NXAPI: display locator-led status for chassis, modules, fans
 [mac_address_count]                          | NXAPI: display mac address-table count
 [nve_interface]                              | NXAPI: display nve interface
+[nve_peers]                                  | NXAPI: display nve peers
 [rib_summary]                                | NXAPI: display ipv4/ipv6 RIB summary
 [switch_bootvar]                             | NXAPI: display current bootvar info
 [switch_find_files]                          | NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices
@@ -244,6 +245,7 @@ netbox_url: http://mynetbox.foo.com'
 [locator_led_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/locator_led_status.py
 [mac_address_count]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/mac_address_count.py
 [nve_interface]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/nve_interface.py
+[nve_peers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/nve_peers.py
 [rib_summary]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/rib_summary.py
 [switch_bootvar]:  https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_bootvar.py
 [switch_find_files]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_find_files.py
