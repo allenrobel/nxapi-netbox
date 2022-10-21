@@ -2,14 +2,26 @@
 '''
 Name: locator_led_status.py
 Description: NXAPI: display locator-led status for chassis, modules, fans
+
+Example output:
+
+% ./locator_led_status.py --vault hashicorp --devices cvd_bgw_1 --module 1,2 --fan 1,2
+ip              hostname           status locator-led 
+192.168.11.110  cvd-1111-bgw       ON     chassis     
+192.168.11.110  cvd-1111-bgw       OFF    module_1    
+192.168.11.110  cvd-1111-bgw       ON     module_2    
+192.168.11.110  cvd-1111-bgw       ON     fan_1       
+192.168.11.110  cvd-1111-bgw       OFF    fan_2       
+
+%
 '''
-our_version = 104
+our_version = 105
 script_name = 'locator_led_status'
 
 #standard libraries
 import argparse
 import re
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -65,33 +77,43 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+        if len(output) > 0:
+            print()
 
 def print_header():
-    print(fmt.format('status', 'locator-led', 'hostname'))
+    print(fmt.format('ip', 'hostname', 'status', 'locator-led'))
 
-def print_items(led, modules, fans):
+def collect_output(ip, nx, modules, fans):
+    lines = list()
     if not cfg.on:
-        print(fmt.format(led.chassis, 'chassis', led.hostname))
-    elif cfg.on and led.chassis == 'ON':
-        print(fmt.format(led.chassis, 'chassis', led.hostname))
+        lines.append(fmt.format(ip, nx.hostname, nx.chassis, 'chassis'))
+    elif cfg.on and nx.chassis == 'ON':
+        lines.append(fmt.format(ip, nx.hostname, nx.chassis, 'chassis'))
     for module in modules:
-        led.module = module
-        if cfg.on and led.module_status != 'ON':
+        nx.module = module
+        if cfg.on and nx.module_status != 'ON':
             continue
-        print(fmt.format(led.module_status, 'module_{}'.format(module), led.hostname))
+        lines.append(fmt.format(ip, nx.hostname, nx.module_status, 'module_{}'.format(module)))
     for fan in fans:
-        led.fan = fan
-        if cfg.on and led.fan_status != 'ON':
+        nx.fan = fan
+        if cfg.on and nx.fan_status != 'ON':
             continue
-        print(fmt.format(led.fan_status, 'fan_{}'.format(fan), led.hostname))
+        lines.append(fmt.format(ip, nx.hostname, nx.fan_status, 'fan_{}'.format(fan)))
+    return lines
 
 def worker(device, vault, modules, fans):
     ip = get_device_mgmt_ip(nb, device)
     nx = NxapiLocatorLedStatus(vault.nxos_username, vault.nxos_password, ip, log)
     nx.nxapi_init(cfg)
     nx.refresh()
-    with lock:
-        print_items(nx, modules, fans)
+    return collect_output(ip, nx, modules, fans)
 
 def cfg_to_list(cfg_list, desc):
     _list = list()
@@ -121,9 +143,12 @@ nb = netbox(vault)
 
 devices = get_device_list()
 
-fmt = '{:<6} {:<12} {:<16}'
+fmt = '{:<15} {:<18} {:<6} {:<12}'
 print_header()
-lock = Lock()
+
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault, modules, fans))
-    t.start()
+    args = [device, vault, modules, fans]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
