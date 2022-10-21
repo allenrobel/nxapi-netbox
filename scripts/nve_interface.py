@@ -38,7 +38,7 @@ def get_parser():
 
     parser.add_argument('--version',
                         action='version',
-                        version='%(prog)s ' + str(our_version))
+                        version='{} v{}'.format('%(prog)s', our_version))
     return parser.parse_args()
 
 def get_device_list():
