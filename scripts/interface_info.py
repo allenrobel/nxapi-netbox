@@ -3,9 +3,20 @@
 Name: interface_info.py
 Description: NXAPI: display info from "show interface" cli
 
-Synopsis:
+Example output (truncated for brevity):
 
-./interface_info.py --vault hashicorp --device leaf_1,leaf_2
+% ./interface_info.py --vault hashicorp --devices cvd_l2_fanout --interface Eth1/1 
+ip              hostname           interface       key                       value     
+192.168.11.116  cvd_l2_911         Ethernet1/1     admin_state               up        
+192.168.11.116  cvd_l2_911         Ethernet1/1     encapsulation             ARPA      
+192.168.11.116  cvd_l2_911         Ethernet1/1     eth_admin_fec_state       auto      
+192.168.11.116  cvd_l2_911         Ethernet1/1     eth_autoneg               on        
+192.168.11.116  cvd_l2_911         Ethernet1/1     eth_babbles               0         
+192.168.11.116  cvd_l2_911         Ethernet1/1     eth_bad_eth               0         
+192.168.11.116  cvd_l2_911         Ethernet1/1     eth_bad_proto             0         
+192.168.11.116  cvd_l2_911         Ethernet1/1     eth_beacon                off       
+etc...
+%
 '''
 our_version = 105
 script_name = 'interface_info'
