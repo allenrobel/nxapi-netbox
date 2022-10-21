@@ -11,12 +11,12 @@ ip              hostname           hostid
 192.168.11.101  cvd-1311-leaf      FDO65050U5M    
  % 
 '''
-our_version = 106
+our_version = 107
 script_name = 'license_hostid'
 
 # standard libraries
 import argparse
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
 # local libraries
 from args.args_cookie import ArgsCookie
 from args.args_nxapi_tools import ArgsNxapiTools
@@ -46,6 +46,14 @@ def get_device_list():
         log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
         exit(1)
 
+def print_output(futures):
+    for future in futures:
+        output = future.result()
+        if output == None:
+            continue
+        for line in output:
+            print(line)
+
 def print_header():
     print(fmt.format('ip', 'hostname', 'hostid'))
 
@@ -54,8 +62,9 @@ def worker(device, vault):
     n = NxapiLicenseHostid(vault.nxos_username, vault.nxos_password, ip, log)
     n.nxapi_init(cfg)
     n.refresh()
-    with lock:
-        print(fmt.format(ip, n.hostname, n.host_id))
+    lines = list()
+    lines.append(fmt.format(ip, n.hostname, n.host_id))
+    return lines
 
 cfg = get_parser()
 log = get_logger(script_name, cfg.loglevel, 'DEBUG')
@@ -68,7 +77,9 @@ devices = get_device_list()
 fmt = '{:<15} {:<18} {:<15}'
 print_header()
 
-lock = Lock()
+executor = ThreadPoolExecutor(max_workers=len(devices))
+futures = list()
 for device in devices:
-    t = Thread(target=worker, args=(device, vault))
-    t.start()
+    args = [device, vault]
+    futures.append(executor.submit(worker, *args))
+print_output(futures)
