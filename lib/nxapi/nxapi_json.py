@@ -50,6 +50,7 @@ class Nxapi(object):
         self.username = username
         self.password = password
         self._dut     = dut
+        self.mgmt_ip = dut
         self.valid_output_formats = ['dict','json']
         self._hostname = None
         self.cli = None
