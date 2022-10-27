@@ -42,7 +42,9 @@ class NxapiConfig(NxapiBase):
             exit(1)
         self.configure_from_file()
         if self.result_code != self.RC_200_SUCCESS:
-            self.log.error("NxapiConfig.commit_file: Unable to commit file {} due to result_code {}".format(
+            self.log.error("NxapiConfig.commit_file: {} {} Unable to commit file {} due to result_code {}".format(
+                self.mgmt_ip,
+                self.hostname,
                 self.config_file,
                 self.result_code))
             return False
@@ -54,6 +56,9 @@ class NxapiConfig(NxapiBase):
         '''
         self.configure_from_list()
         if self.result_code != self.RC_200_SUCCESS:
-            self.log.error("NxapiConfig.commit_list: Unable to commit list due to result_code {}".format(self.result_code))
+            self.log.error("NxapiConfig.commit_list: {} {} Unable to commit list due to result_code {}".format(
+                self.mgmt_ip,
+                self.hostname,
+                self.result_code))
             return False
         return True
