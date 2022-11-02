@@ -50,6 +50,7 @@ Script                                       | Description
 [switch_reload]                              | NXAPI: reload (or install reset) one or more NX-OS devices
 [switch_reset_reason]                        | NXAPI: display NXOS reset reason and time last reset
 [switch_version]                             | NXAPI: display NXOS version information
+[system_mode]                                | NXAPI: display system mode
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
 [test_vault_hashicorp]                       | Verify that HashiCorp Vault is working and contains the keys required by scripts in this repo
 [vrf]                                        | NXAPI: display vrfs
@@ -259,6 +260,7 @@ netbox_url: http://mynetbox.foo.com'
 [switch_reload]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reload.py
 [switch_reset_reason]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_reset_reason.py
 [switch_version]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/switch_version.py
+[system_mode]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/system_mode.py
 [test_vault_ansible]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_ansible.py
 [test_vault_hashicorp]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_hashicorp.py
 [vrf]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/vrf.py
