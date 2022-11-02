@@ -15,20 +15,19 @@ ip              hostname             serial       name            product_id    
 % 
 
 '''
-our_version = 111
+our_version = 112
 script_name = 'inventory_find_serial_numbers'
 
 #standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_inventory import NxapiInventory
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_inventory import NxapiInventory
 
 def get_parser():
     help_serials = 'a comma-separated list (no spaces) of Nexus serial numbers'

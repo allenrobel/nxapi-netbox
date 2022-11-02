@@ -21,7 +21,7 @@ This script will not work without completing the following:
     ANSIBLE_VAULT_PATH=/Users/me/repos/nxapi-netbox-prod/secrets
 
 '''
-from vault.vault import get_vault
+from nxapi_netbox.vault.vault import get_vault
 vault = get_vault('ansible')
 vault.fetch_data()
 print('nxos_username: {}'.format(vault.nxos_username))

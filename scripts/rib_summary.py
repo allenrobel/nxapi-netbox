@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 107
+our_version = 108
 script_name = 'rib_summary'
 '''
 Name: rib_summary.py
@@ -46,13 +46,12 @@ NOTES:
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_rib_summary import NxapiRibSummaryIpv4, NxapiRibSummaryIpv6
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_rib_summary import NxapiRibSummaryIpv4, NxapiRibSummaryIpv6
 
 def get_parser():
     help_ipv4 = 'display ipv4 routes. can be used together with --ipv6'

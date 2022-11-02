@@ -3,20 +3,19 @@
 Name: bgp_neighbors_l2vpn_evpn.py
 Description: NXAPI: display bgp l2vpn evpn neighbor info
 '''
-our_version = 102
+our_version = 103
 script_name = 'bgp_neighbors_l2vpn_evpn'
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_bgp_l2vpn_evpn_summary import NxapiBgpL2vpnEvpnSummary
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_bgp_l2vpn_evpn_summary import NxapiBgpL2vpnEvpnSummary
 
 def get_parser():
     valid_bgp_state = ['Established', 'Idle']

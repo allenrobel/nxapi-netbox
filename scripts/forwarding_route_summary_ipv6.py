@@ -35,21 +35,20 @@ IP              Hostname                 Value Description
 192.168.11.101  cvd-1311-leaf                1 /128 prefixlen
 %
 '''
-our_version = 105
+our_version = 106
 script_name = 'forwarding_route_summary_ipv6'
 
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 #local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from general.constants import Constants
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_forwarding_route_summary import NxapiForwardingRouteSummaryIpv6
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.general.constants import Constants
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_forwarding_route_summary import NxapiForwardingRouteSummaryIpv6
 
 def get_parser():
     help_module = 'module on which to query forwarding ipv6 route summary info'

@@ -19,7 +19,7 @@ ip              hostname             interface          state                spe
 
 % 
 '''
-our_version = 100
+our_version = 101
 script_name = 'interface_link_not_connected.py'
 
 # standard libraries
@@ -27,13 +27,12 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_interface import NxapiInterface, NxapiInterfaceStatus
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_interface import NxapiInterface, NxapiInterfaceStatus
 
 def get_parser():
     parser = argparse.ArgumentParser(

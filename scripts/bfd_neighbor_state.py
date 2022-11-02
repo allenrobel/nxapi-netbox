@@ -7,7 +7,7 @@ Example:
 
 watch ./bfd_neighbor_state.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2
 '''
-our_version = 105
+our_version = 106
 script_name = 'bfd_neighbor_state'
 
 # standard libraries
@@ -16,13 +16,12 @@ from concurrent.futures import ThreadPoolExecutor
 from gc import collect
 
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_bfd import NxapiBfdNeighbors
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_bfd import NxapiBfdNeighbors
 
 def get_parser():
     title = 'display bfd neighbor state for all neighbors on --device'

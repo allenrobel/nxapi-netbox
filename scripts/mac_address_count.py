@@ -11,21 +11,20 @@ ip              device             vlan   total     dyn     otv rvtep  static  s
 192.168.11.116  cvd_l2_911          all      25      25       0     0       0       0
 % 
 '''
-our_version = 106
+our_version = 107
 script_name = 'mac_address_count'
 
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_mac_address_table import NxapiMacCount
-from nxapi.nxapi_vlan import NxapiVlanId
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_mac_address_table import NxapiMacCount
+from nxapi_netbox.nxapi.nxapi_vlan import NxapiVlanId
 
 def get_parser():
     help_vlan = 'the vlan in which to query mac address-table count. If not specified, printed values represent totals for all vlans'

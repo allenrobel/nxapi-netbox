@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 108
+our_version = 109
 '''
 Name: forwarding_route_ipv4.py
 Description: NXAPI: Display ipv4 prefix information from FIB related to --module --vrf --prefix 
@@ -39,14 +39,13 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from general.verify_types import VerifyTypes
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_forwarding_route_unicast import NxapiForwardingRouteUnicastIpv4
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.general.verify_types import VerifyTypes
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_forwarding_route_unicast import NxapiForwardingRouteUnicastIpv4
 
 def get_parser():
     help_module = 'module to query for prefix'

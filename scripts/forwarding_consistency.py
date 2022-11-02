@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 105
+our_version = 106
 '''
 Name: forwarding_consistency.py
 Description: NXAPI: start and display results for forwarding consistency checker
@@ -11,14 +11,13 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_show import NxapiShow
-from nxapi.nxapi_config import NxapiConfig
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_show import NxapiShow
+from nxapi_netbox.nxapi.nxapi_config import NxapiConfig
 
 
 def get_parser():

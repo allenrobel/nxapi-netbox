@@ -78,6 +78,12 @@ which vault is used with the ``--vault`` argument to each script.
 
 #### 1. The following environment variables need to be set and exported
 
+##### ``PYTHONPATH``
+
+```bash
+export PYTHONPATH=$PYTHONPATH:/path/to/nxapi-netbox/lib
+```
+
 ##### If using Hashicorp Vault
 
 ```bash
@@ -106,7 +112,7 @@ VAULT_TOKEN=hvs.SiVa7BDO92FfETBLdQuMxSCq
 
 ```bash
 % env | grep ANSIBLE_VAULT_PATH
-VAULT_TOKEN=hvs.SiVa7BDO92FfETBLdQuMxSCq
+ANSIBLE_VAULT_PATH=/Users/me/repos/nxapi-netbox/lib/nxapi_netbox/config/secrets
 ```
 
 #### 3. HashiCorp Vault

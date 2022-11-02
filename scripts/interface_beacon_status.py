@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 108
+our_version = 110
 '''
 Name: interface_beacon_status.py
 Description: NXAPI: display interface beacon status
@@ -19,14 +19,13 @@ script_name = 'interface_beacon_status'
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_interface import NxapiInterface
-from nxapi.nxapi_interface import NxapiInterfaceStatus
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_interface import NxapiInterface
+from nxapi_netbox.nxapi.nxapi_interface import NxapiInterfaceStatus
 
 help_interface = 'If present, interface to monitor.  If not present, all interfaces will be monitored.'
 help_on = 'If present, print only interfaces whose beacon status is on. If not present, print all interface beacon status.'

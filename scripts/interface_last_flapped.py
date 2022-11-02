@@ -21,7 +21,7 @@ ip              hostname           interface       state   admin   flapped   cle
 
 % 
 '''
-our_version = 105
+our_version = 106
 script_name = 'interface_last_flapped'
 
 # standard libraries
@@ -29,14 +29,13 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_interface import NxapiInterface
-from nxapi.nxapi_interface import NxapiInterfaceStatus
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_interface import NxapiInterface
+from nxapi_netbox.nxapi.nxapi_interface import NxapiInterfaceStatus
 
 def get_parser():
     help_interface = 'If present, interface to monitor.  If not present, all interfaces will be monitored.'

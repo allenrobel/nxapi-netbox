@@ -3,7 +3,7 @@
 Name: bfd_neighbor_info.py
 Description: NXAPI: display bfd neighbors detail information.
 '''
-our_version = 106
+our_version = 107
 script_name = 'bfd_neighbor_info'
 
 # standard libraries
@@ -11,13 +11,12 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_bfd import NxapiBfdNeighbors
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_bfd import NxapiBfdNeighbors
 
 ex_ipv6 = ' Example: --ipv6'
 help_ipv6 = 'If present, show ipv6 bgp neighbor state, else show ipv4 bgp neighbor state.'

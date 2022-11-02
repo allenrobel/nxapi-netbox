@@ -4,18 +4,17 @@ Name: inventory.py
 Description: NXAPI: display "show inventory" info
 '''
 script_name = 'inventory'
-our_version = 101
+our_version = 102
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_inventory import NxapiInventory
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_inventory import NxapiInventory
 
 def get_parser():
     parser = argparse.ArgumentParser(

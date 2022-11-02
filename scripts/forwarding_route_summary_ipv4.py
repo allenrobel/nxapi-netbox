@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 105
+our_version = 106
 '''
 Name: forwarding_route_summary_ipv4.py
 Description: NXAPI: display forwarding ipv4 route summary
@@ -24,14 +24,13 @@ script_name = 'forwarding_route_summary_ipv4'
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 #local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from general.verify_types import Constants
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_forwarding_route_summary import NxapiForwardingRouteSummaryIpv4
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.general.verify_types import Constants
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_forwarding_route_summary import NxapiForwardingRouteSummaryIpv4
 
 def get_parser():
     help_module = 'module on which to query forwarding ipv4 route summary info'

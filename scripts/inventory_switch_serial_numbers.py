@@ -18,20 +18,19 @@ ip              hostname           serial       name                 description
 % 
 
 '''
-our_version = 110
-script_name = 'serial_numbers'
+our_version = 111
+script_name = 'inventory_switch_serial_numbers'
 
 #standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_inventory import NxapiInventory
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_inventory import NxapiInventory
 
 
 def get_parser():

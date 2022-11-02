@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-our_version = 109
+our_version = 110
 script_name = 'switch_version'
 '''
 Name: switch_version.py
@@ -14,13 +14,12 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_version import NxapiVersion
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_version import NxapiVersion
 
 def get_parser():
     parser = argparse.ArgumentParser(

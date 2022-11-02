@@ -6,7 +6,7 @@ Synopsis:
 
 ./switch_reload.py --vault hashicorp --device leaf_1,leaf_2
 '''
-our_version = 105
+our_version = 106
 script_name = 'switch_reload.py'
 
 # standard libraries
@@ -14,13 +14,12 @@ import argparse
 from threading import Thread
 
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_config import NxapiConfig
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_config import NxapiConfig
 
 def get_parser():
     help_install_reset = 'If present, use install reset, instead of reload.  If not present, the default is to use reload'
