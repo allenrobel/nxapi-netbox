@@ -18,20 +18,19 @@ ip              hostname           vrf_name        vrf_id vrf_state vrf_reason
 192.168.11.103  cvd-1312-leaf      v2              4      Up        --                            
 %
 '''
-our_version = 106
+our_version = 107
 script_name = 'vrf.py'
 
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 # local libraries
-from args.args_cookie import ArgsCookie
-from args.args_nxapi_tools import ArgsNxapiTools
-from general.log import get_logger
-from netbox.netbox_session import netbox, get_device_mgmt_ip
-from netbox.device import Device
-from vault.vault import get_vault
-from nxapi.nxapi_vrf import NxapiVrf
+from nxapi_netbox.args.args_cookie import ArgsCookie
+from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
+from nxapi_netbox.general.log import get_logger
+from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
+from nxapi_netbox.vault.vault import get_vault
+from nxapi_netbox.nxapi.nxapi_vrf import NxapiVrf
 
 def get_parser():
     parser = argparse.ArgumentParser(
