@@ -1,0 +1,11 @@
+# Full path to your ansible vault
+vault: '/home/your_account/repos/netbox-tools-prod/lib/netbox_tools/config/secrets'
+
+# If your netbox installation is configured with insecure TLS, set 
+# ssl_verify to False to avoid urllib3 InsecureRequestwarning
+ssl_verify: True
+
+# If you encounter urllib3 InsecureRequestWarning warnings, set
+# disable_insecure_request_warnings to True.
+
+disable_insecure_request_warnings: True
