@@ -8,7 +8,7 @@ Example output:
 % ./system_mode.py --vault hashicorp --devices cvd_leaf_1,cvd_leaf_2
 ip              hostname           system_mode timer_state              
 172.22.150.102  cvd-1311-leaf      Normal      na                       
-172.22.150.103  cvd-1312-leaf      Normal      switch to maintenance mode in progress
+172.22.150.103  cvd-1312-leaf      Maintenance switch to maintenance mode in progress
 %
 '''
 # standard libraries
