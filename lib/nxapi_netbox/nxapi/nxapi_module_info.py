@@ -42,7 +42,7 @@ switch# sh module | json-pretty
 switch# 
 
 '''
-our_version = 106
+our_version = 107
 
 # standard libraries
 # local libraries
@@ -284,6 +284,12 @@ class NxapiModuleInfo(NxapiBase):
         if self.module not in d:
             self.log.error('exiting. module {} not in ')
 
+    def get_value(self, d, key):
+        '''used to avoid key errors in the getter properties below'''
+        try:
+            return d[self.module][key]
+        except:
+            return 'na'
 
     @property
     def module(self):
@@ -297,86 +303,86 @@ class NxapiModuleInfo(NxapiBase):
     def diagstatus(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.moddiaginfo[self.module]['diagstatus']
+        return self.get_value(self.moddiaginfo, 'diagstatus')
 
     @property
     def mod(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.moddiaginfo[self.module]['mod']
+        return self.get_value(self.moddiaginfo, 'mod')
 
     # modmacinfo
     @property
     def mac(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modmacinfo[self.module]['mac']
+        return self.get_value(self.modmacinfo, 'mac')
 
     @property
     def serialnum(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modmacinfo[self.module]['serialnum']
+        return self.get_value(self.modmacinfo, 'serialnum')
 
     @property
     def modmac(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modmacinfo[self.module]['modmac']
+        return self.get_value(self.modmacinfo, 'modmac')
 
     # modinfo
     @property
     def model(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modinfo[self.module]['model']
+        return self.get_value(self.modinfo, 'model')
 
     @property
     def modinf(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modinfo[self.module]['modinf']
+        return self.get_value(self.modinfo, 'modinf')
 
     @property
     def modtype(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modinfo[self.module]['modtype']
+        return self.get_value(self.modinfo, 'modtype')
 
     @property
     def ports(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modinfo[self.module]['ports']
+        return self.get_value(self.modinfo, 'ports')
 
     @property
     def status(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modinfo[self.module]['status']
+        return self.get_value(self.modinfo, 'status')
 
     # modwwninfo
     @property
     def hw(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modwwninfo[self.module]['hw']
+        return self.get_value(self.modwwninfo, 'hw')
 
     @property
     def modwwn(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modwwninfo[self.module]['modwwn']
+        return self.get_value(self.modwwninfo, 'modwwn')
 
     @property
     def slottype(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modwwninfo[self.module]['slottype']
+        return self.get_value(self.modwwninfo, 'slottype')
 
     @property
     def sw(self):
         if self.refreshed == False:
             self.refresh_needed()
-        return self.modwwninfo[self.module]['sw']
+        return self.get_value(self.modwwninfo, 'sw')
 
