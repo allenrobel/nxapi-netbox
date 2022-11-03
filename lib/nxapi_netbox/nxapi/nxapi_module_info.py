@@ -4,11 +4,9 @@ Name: nxapi_ip_route_summary.py
 Author: Allen Robel (arobel@cisco.com)
 Description: Classes containing methods for retrieving module (linecard) status from NXOS device via NXAPI
 
-This corresponds to the output provided by the following cli:
+This corresponds to the output below:
 
-show module
-
-ts_104# sh module | json-pretty 
+switch# sh module | json-pretty 
 {
     "TABLE_modinfo": {
         "ROW_modinfo": {
@@ -41,67 +39,7 @@ ts_104# sh module | json-pretty
         }
     }
 }
-ts_104# 
-
-Synopsis:
-
-ip = '172.22.150.53'
-
-import argparse
-from cargs_sid import cArgs
-from log import get_logger
-from nxapi_module_info import NxapiModuleInfo
-
-parser = argparse.ArgumentParser(description='DESCRIPTION: display bfd info via NXAPI', parents=[cArgs])
-default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
-mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
-
-parser.add_argument('--version',
-                    action='version',
-                    version='%(prog)s ' + str(our_version))
-
-cfg = parser.parse_args()
-mgmt_ip = '172.22.159.4'
-log = get_logger('my_script', cfg.loglevel, 'DEBUG')
-# note cfg.sid is not being used here. instead we hardcode mgmt_ip
-modules = NxapiModuleInfo(cfg.username, cfg.password, mgmt_ip, log)
-modules.nxapi_init(cfg)
-
-modules.refresh()
-for module in modules.modinfo:
-    for key in modules.modinfo[module]:
-        log.info('{:>10} {:<50}'.format(key, modules.modinfo[module][key]))
-print()
-for module in modules.modwwninfo:
-    for key in modules.modwwninfo[module]:
-        log.info('{:>10} {:<50}'.format(key, modules.modwwninfo[module][key]))
-print()
-for module in modules.modmacinfo:
-    for key in modules.modmacinfo[module]:
-        log.info('{:>10} {:<50}'.format(key, modules.modmacinfo[module][key]))
-print()
-for module in modules.moddiaginfo:
-    for key in modules.moddiaginfo[module]:
-        log.info('{:>10} {:<50}'.format(key, modules.moddiaginfo[module][key]))
-
-
-Revision history:
-
-date       ver  engineer       comment
---------  ----  -------------  -----------------------------------------------------------------------------------------------------------------
-20190522   106  arobel         update Synopsis
-20190522   106  arobel         modifications to support NxapiBase() inheritance of Nxapi()
-20190220   105  arobel         module_info() add self.module to log messages 
-20190220   105  arobel         NxapiModuleInfo.__init__() remove print statement when entering init
-20181112   104  arobel         reformat columns in Revision history to align with other scripts
-20180724   103  arobel         remove all other instances of exit() since this library will be used for threaded scripts we want to return instead
-20180724   103  arobel         all classes, accept a log instance as argument and pass it to super()
-20180723   102  arobel         module_info() - do not exit if module setter has not been called first
-20180723   102  arobel         @property module - do not exit if module setter has not been called first. Instead return default -1
-20180722   101  arobel         fix couple typos in this header docstring
-20180722   101  arobel         Nx* rename to Nxapi* to avoid ambiguity with e.g. Nxos
-20180722   101  arobel         import NxBase, change to import NxapiBase due to renamed library file
-20180618   100  arobel         Initial version
+switch# 
 
 '''
 our_version = 106
