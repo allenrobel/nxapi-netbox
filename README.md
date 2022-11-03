@@ -54,6 +54,7 @@ Script                                       | Description
 [system_mode]                                | NXAPI: display system mode
 [test_vault_ansible]                         | Verify that Ansible Vault is working and contains the keys required by scripts in this repo
 [test_vault_hashicorp]                       | Verify that HashiCorp Vault is working and contains the keys required by scripts in this repo
+[virtual_service_status]                     | NXAPI: display all virtual-service names and status
 [vrf]                                        | NXAPI: display vrfs
 
 
@@ -265,4 +266,5 @@ netbox_url: http://mynetbox.foo.com'
 [system_mode]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/system_mode.py
 [test_vault_ansible]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_ansible.py
 [test_vault_hashicorp]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/test_vault_hashicorp.py
+[virtual_service_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/virtual_service_status.py
 [vrf]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/vrf.py
