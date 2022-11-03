@@ -37,6 +37,7 @@ Script                                       | Description
 [interface_packet_rates]                     | NXAPI: display interface input/output packet rates for a set of interfaces
 [inventory]                                  | NXAPI: display "show inventory" info
 [inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
+[inventory_module_info]                      | NXAPI: display model, hw, sw versions for ``--module``
 [inventory_switch_serial_numbers]            | NXAPI: display all serial numbers
 [license_hostid]                             | NXAPI: display license host_id
 [lldp_neighbors]                             | NXAPI: display lldp neighbor info
@@ -247,6 +248,7 @@ netbox_url: http://mynetbox.foo.com'
 [interface_packet_rates]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_packet_rates.py
 [inventory]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory.py
 [inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
+[inventory_module_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_module_info.py
 [inventory_switch_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_switch_serial_numbers.py
 [license_hostid]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/license_hostid.py
 [lldp_neighbors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/lldp_neighbors.py
