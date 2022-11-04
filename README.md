@@ -14,6 +14,7 @@ This repo contains scripts and libraries to interact with Cisco NX-OS switches o
 
 Script                                       | Description
 ------------                                 | -----------
+[acl_utilization]                            | NXAPI display acl tcam utilization
 [arp_summary]                                | NXAPI: display ip arp summary
 [bfd_neighbor_info]                          | NXAPI: display bfd neighbors detail information
 [bfd_neighbor_state]                         | NXAPI: display bfd neighbor state for all neighbors
@@ -229,8 +230,9 @@ nxos_username: admin
 nxos_password: ax84fs00fs
 netbox_token: 21716fi7k4ac9a8a51d99c5fab025e207b741fe
 netbox_url: http://mynetbox.foo.com'
-```
 
+```
+[acl_utilization]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/acl_utilization.py
 [arp_summary]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/arp_summary.py
 [bfd_neighbor_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bfd_neighbor_info.py
 [bgp_l2vpn_evpn_summary]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/bgp_l2vpn_evpn_summary.py
