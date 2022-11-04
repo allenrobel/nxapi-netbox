@@ -12,7 +12,7 @@ Example output:
 
 Without --summed:
 
-% ./test_system_process_memory.py --vault hashicorp --devices cvd_leaf_1
+% ./system_process_memory.py --vault hashicorp --devices cvd_leaf_1
 ip              hostname           process_name              virtual  physical rss      processid(s)
 192.168.11.102  cvd-1311-leaf      init                      2272     141      1680     1
 192.168.11.102  cvd-1311-leaf      vsh.bin                   694232   21068    102096   3794
