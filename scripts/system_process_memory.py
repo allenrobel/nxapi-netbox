@@ -8,17 +8,6 @@ This script displays cumulative memory usage for physical, virtual, and rss memo
 Some processes (e.g. bash) contain multiple entries with the same name.  For these,
 we sum their memory usage and print a list of process IDs with this name.
 
-If you want all the processes listed individually, you can modify worker() to loop over
-nx.info_by_process_id, like this:
-
-    for process_id in nx.info_by_process_id:
-        processname = nx.info_py_process_id[process_id]['processname']
-        physical = nx.info_py_process_id[process_id]['physical']
-        rss = nx.info_py_process_id[process_id]['rss']
-        virtual = nx.info_py_process_id[process_id]['virtual']
-        lines.append(fmt.format(ip, nx.hostname, nx.processname, virtual, physical, rss, process_id))
-
-
 Example output:
 
 Without --summed:
