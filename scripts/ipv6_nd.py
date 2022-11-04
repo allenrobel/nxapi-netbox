@@ -53,8 +53,6 @@ def print_output(futures):
             continue
         for line in output:
             print(line)
-        if len(output) > 0:
-            print()
 
 def print_header():
     print(fmt.format(
@@ -76,7 +74,7 @@ def worker(device, vault):
     lines = list()
     for neighbor in nx.info:
         nx.ipv6_addr = neighbor
-        print(fmt.format(
+        lines.append(fmt.format(
             ip,
             nx.hostname,
             nx.ipv6_addr,
