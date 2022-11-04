@@ -38,6 +38,7 @@ Script                                       | Description
 [inventory_find_serial_numbers]              | NXAPI: find one or more serial numbers across a set of NXOS switches
 [inventory_module_info]                      | NXAPI: display model, hw, sw versions for ``--module``
 [inventory_switch_serial_numbers]            | NXAPI: display all serial numbers
+[ipv6_nd]                                    | NXAPI: display ipv6 neighbor info
 [license_hostid]                             | NXAPI: display license host_id
 [lldp_neighbors]                             | NXAPI: display lldp neighbor info
 [locator_led_status]                         | NXAPI: display locator-led status for chassis, modules, fans
@@ -253,6 +254,7 @@ netbox_url: http://mynetbox.foo.com'
 [inventory_find_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_find_serial_numbers.py
 [inventory_module_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_module_info.py
 [inventory_switch_serial_numbers]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/inventory_switch_serial_numbers.py
+[ipv6_nd]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/ipv6_nd.py
 [license_hostid]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/license_hostid.py
 [lldp_neighbors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/lldp_neighbors.py
 [locator_led_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/locator_led_status.py
