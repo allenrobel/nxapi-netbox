@@ -11,7 +11,7 @@ from nxapi_netbox.general.log import get_logger
 from nxapi_netbox.nxapi.nxapi_ipv6_nd import NxapiIpv6Neighbor
 # INFO logging to screen, DEBUG logging to file /tmp/script_name.log
 log = get_logger('script_name', 'INFO', 'DEBUG')
-nx = NxapiIpv6Neighbor('myusername', 'mypassword', 192.168.1.1, log)
+nx = NxapiIpv6Neighbor('myusername', 'mypassword', '192.168.1.1', log)
 nx.nxapi_init(cfg)
 nx.vrf = 'default'
 nx.refresh()
