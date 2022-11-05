@@ -5,11 +5,7 @@ Name: nxapi_interface_transceiver.py
 Author: Allen Robel (arobel@cisco.com)
 Description:
 
-Classes containing methods for retrieving interface transceiver information via NXAPI
-
-Revision history: use git log
-
-Example script: See dssperf/python/lib3/unit_test_nxapi_interface_transceiver.py
+Classes for retrieving interface transceiver information via NXAPI
 
 Example of json data processed by this class.
 

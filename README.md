@@ -31,6 +31,7 @@ Script                                       | Description
 [interface_beacon_status]                    | NXAPI: display interface beacon status
 [interface_egress_queuing]                   | NXAPI: display interface egress queing information (not very well tested yet...)
 [interface_errors]                           | NXAPI: display non-zero interface error counters
+[interface_find_transceiver]                 | NXAPI: Find transceivers across one or more switches, using a variety of search terms
 [interface_info]                             | NXAPI: display info from "show interface" cli
 [interface_last_flapped]                     | NXAPI: display interface last flapped/cleared timers, and reset info
 [interface_link_not_connected]               | NXAPI: display interfaces in notconnect state (Link not connected)
@@ -249,6 +250,7 @@ netbox_url: http://mynetbox.foo.com'
 [interface_beacon_status]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_beacon_status.py
 [interface_egress_queuing]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_egress_queuing.py
 [interface_errors]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_errors.py
+[interface_find_transceiver]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_find_transceiver.py
 [interface_info]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_info.py
 [interface_last_flapped]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_last_flapped.py
 [interface_link_not_connected]: https://github.com/allenrobel/nxapi-netbox/blob/main/scripts/interface_link_not_connected.py
