@@ -1,4 +1,4 @@
-'''
+"""
 netbox_config.py
 
 Description:
@@ -15,19 +15,21 @@ print('c.vault {}'.format(c.config['vault']))
 Author:
 
 Allen Robel (arobel@cisco.com)
-'''
+"""
 import yaml
 
-config_file = '/home/your_account/repos/nxapi-netbox/lib/nxapi_netbox/netbox/config.yml'
+config_file = "/Users/arobel/repos/nxapi-netbox/lib/nxapi_netbox/netbox/config.yml"
+
+
 class LoadConfig(object):
     def __init__(self):
         self.properties = dict()
         self.load_config()
 
     def load_config(self):
-        with open(config_file, 'r') as fp:
-            self.properties['config'] = yaml.safe_load(fp)
+        with open(config_file, "r") as fp:
+            self.properties["config"] = yaml.safe_load(fp)
 
     @property
     def config(self):
-        return self.properties['config']
+        return self.properties["config"]

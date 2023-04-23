@@ -1,5 +1,5 @@
 # Full path to your ansible vault
-vault: '/home/your_account/repos/netbox-tools-prod/lib/netbox_tools/config/secrets'
+vault: '/Users/arobel/repos/netbox-tools-prod/lib/netbox_tools/config/secrets'
 
 # If your netbox installation is configured with insecure TLS, set 
 # ssl_verify to False to avoid urllib3 InsecureRequestwarning

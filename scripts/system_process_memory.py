@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 Name: system_process_memory.py
 Description: NXAPI: display memory usage of system processes
 
@@ -43,10 +43,11 @@ ip              hostname           process_name              virtual  physical r
 192.168.11.104  cvd-1313-leaf      vsh.bin                   5496848  128874   729872   8         8856,8857,8859,8861,16761,17548,18574,19092
 192.168.11.105  cvd-1314-leaf      vsh.bin                   6190788  141882   825896   9         2115,2116,2118,2120,14086,14870,15700,15740,16401
  % 
-'''
+"""
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+
 # local libraries
 from nxapi_netbox.args.args_cookie import ArgsCookie
 from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
@@ -56,45 +57,59 @@ from nxapi_netbox.vault.vault import get_vault
 from nxapi_netbox.nxapi.nxapi_process_memory import NxapiProcessMemoryPhysical
 
 our_version = 100
-script_name = 'system_process_memory'
+script_name = "system_process_memory"
+
 
 def get_parser():
-    help_summed = 'By default, processes are individually listed, by processid.  If --summed is present, then memory usage for processes with the same processname are summed and entry for the process name is printed, along with a list of processids for that name.'
-    help_processname = 'If present, retrieve stats only for this process.'
+    help_summed = "By default, processes are individually listed, by processid.  If --summed is present, then memory usage for processes with the same processname are summed and entry for the process name is printed, along with a list of processids for that name."
+    help_processname = "If present, retrieve stats only for this process."
 
-    ex_summed = 'Example: --summed'
-    ex_processname = 'Example: --processname dcos_sshd'
+    ex_summed = "Example: --summed"
+    ex_processname = "Example: --processname dcos_sshd"
 
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: NXAPI: display memory usage of system processes',
-        parents=[ArgsCookie, ArgsNxapiTools])
-    default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
-    mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
+        description="DESCRIPTION: NXAPI: display memory usage of system processes",
+        parents=[ArgsCookie, ArgsNxapiTools],
+    )
+    default = parser.add_argument_group(title="DEFAULT SCRIPT ARGS")
+    mandatory = parser.add_argument_group(title="MANDATORY SCRIPT ARGS")
 
-    default.add_argument('--summed',
-                        dest='summed',
-                        required=False,
-                        action='store_true',
-                        default=False,
-                        help='{} {} {}'.format('DEFAULT: %(default)s.', help_summed, ex_summed))
+    default.add_argument(
+        "--summed",
+        dest="summed",
+        required=False,
+        action="store_true",
+        default=False,
+        help="{} {} {}".format("DEFAULT: %(default)s.", help_summed, ex_summed),
+    )
 
-    default.add_argument('--processname',
-                        dest='processname',
-                        required=False,
-                        default=None,
-                        help='{} {} {}'.format('DEFAULT: %(default)s.', help_processname, ex_processname))
+    default.add_argument(
+        "--processname",
+        dest="processname",
+        required=False,
+        default=None,
+        help="{} {} {}".format(
+            "DEFAULT: %(default)s.", help_processname, ex_processname
+        ),
+    )
 
-    parser.add_argument('--version',
-                        action='version',
-                        version='{} v{}'.format('%(prog)s', our_version))
+    parser.add_argument(
+        "--version", action="version", version="{} v{}".format("%(prog)s", our_version)
+    )
     return parser.parse_args()
+
 
 def get_device_list():
     try:
-        return cfg.devices.split(',')
+        return cfg.devices.split(",")
     except:
-        log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
+        log.error(
+            "exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2".format(
+                cfg.devices
+            )
+        )
         exit(1)
+
 
 def print_output(futures):
     for future in futures:
@@ -104,10 +119,29 @@ def print_output(futures):
         for line in output:
             print(line)
 
+
 def print_header_worker():
-    print(fmt_worker.format('ip', 'hostname', 'process_name', 'virtual', 'physical', 'rss', 'instances', 'processid(s)'))
+    print(
+        fmt_worker.format(
+            "ip",
+            "hostname",
+            "process_name",
+            "virtual",
+            "physical",
+            "rss",
+            "instances",
+            "processid(s)",
+        )
+    )
+
+
 def print_header_worker_by_processid():
-    print(fmt_worker_by_processid.format('ip', 'hostname', 'process_name', 'virtual', 'physical', 'rss', 'processid'))
+    print(
+        fmt_worker_by_processid.format(
+            "ip", "hostname", "process_name", "virtual", "physical", "rss", "processid"
+        )
+    )
+
 
 # Use this to view individual memory stats for all processes
 def worker_by_processid(device, vault):
@@ -118,20 +152,29 @@ def worker_by_processid(device, vault):
     lines = list()
     if cfg.processname != None:
         for process_id in nx.info_by_processid:
-            processname = nx.info_by_processid[process_id]['processname']
+            processname = nx.info_by_processid[process_id]["processname"]
             if processname == cfg.processname:
-                physical = nx.info_by_processid[process_id]['physical']
-                rss = nx.info_by_processid[process_id]['rss']
-                virtual = nx.info_by_processid[process_id]['virtual']
-                lines.append(fmt_worker_by_processid.format(ip, nx.hostname, processname, virtual, physical, rss, process_id))
+                physical = nx.info_by_processid[process_id]["physical"]
+                rss = nx.info_by_processid[process_id]["rss"]
+                virtual = nx.info_by_processid[process_id]["virtual"]
+                lines.append(
+                    fmt_worker_by_processid.format(
+                        ip, nx.hostname, processname, virtual, physical, rss, process_id
+                    )
+                )
     else:
         for process_id in nx.info_by_processid:
-            processname = nx.info_by_processid[process_id]['processname']
-            physical = nx.info_by_processid[process_id]['physical']
-            rss = nx.info_by_processid[process_id]['rss']
-            virtual = nx.info_by_processid[process_id]['virtual']
-            lines.append(fmt_worker_by_processid.format(ip, nx.hostname, processname, virtual, physical, rss, process_id))
+            processname = nx.info_by_processid[process_id]["processname"]
+            physical = nx.info_by_processid[process_id]["physical"]
+            rss = nx.info_by_processid[process_id]["rss"]
+            virtual = nx.info_by_processid[process_id]["virtual"]
+            lines.append(
+                fmt_worker_by_processid.format(
+                    ip, nx.hostname, processname, virtual, physical, rss, process_id
+                )
+            )
     return lines
+
 
 # Use this to view summed memory stats for processes with the same name
 def worker(device, vault):
@@ -142,23 +185,46 @@ def worker(device, vault):
     lines = list()
     if cfg.processname != None:
         nx.process = cfg.processname
-        lines.append(fmt_worker.format(ip, nx.hostname, nx.processname, nx.virtual, nx.physical, nx.rss, nx.instances, nx.processid))
+        lines.append(
+            fmt_worker.format(
+                ip,
+                nx.hostname,
+                nx.processname,
+                nx.virtual,
+                nx.physical,
+                nx.rss,
+                nx.instances,
+                nx.processid,
+            )
+        )
     else:
         for process in nx.process_names:
             nx.process = process
-            lines.append(fmt_worker.format(ip, nx.hostname, nx.processname, nx.virtual, nx.physical, nx.rss, nx.instances, nx.processid))
+            lines.append(
+                fmt_worker.format(
+                    ip,
+                    nx.hostname,
+                    nx.processname,
+                    nx.virtual,
+                    nx.physical,
+                    nx.rss,
+                    nx.instances,
+                    nx.processid,
+                )
+            )
     return lines
 
+
 cfg = get_parser()
-log = get_logger(script_name, cfg.loglevel, 'DEBUG')
+log = get_logger(script_name, cfg.loglevel, "DEBUG")
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
 
 devices = get_device_list()
 
-fmt_worker = '{:<15} {:<18} {:<25} {:<8} {:<8} {:<8} {:<9} {}'
-fmt_worker_by_processid = '{:<15} {:<18} {:<25} {:<8} {:<8} {:<8} {}'
+fmt_worker = "{:<15} {:<18} {:<25} {:<8} {:<8} {:<8} {:<9} {}"
+fmt_worker_by_processid = "{:<15} {:<18} {:<25} {:<8} {:<8} {:<8} {}"
 if cfg.summed == True:
     print_header_worker()
 else:

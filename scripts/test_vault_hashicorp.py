@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Name: test_vault_hashicorp.py
 Summary: Verify that HashiCorp Vault is working and contains the keys required by scripts in this repo
 
@@ -36,13 +36,13 @@ vault = VaultHashiCorp()
 vault.endpoint = '/v2/kv/myendpoint'
 vault.fetch_data()
 
-'''
+"""
 from nxapi_netbox.vault.vault import get_vault
 
-vault = get_vault('hashicorp')
+vault = get_vault("hashicorp")
 # vault.endpoint = '/v1/kv/myendpoint'
 vault.fetch_data()
-print('nxos_username: {}'.format(vault.nxos_username))
-print('nxos_password: {}'.format(vault.nxos_password))
-print('netbox_token: {}'.format(vault.netbox_token))
-print('netbox_url: {}'.format(vault.netbox_url))
+print("nxos_username: {}".format(vault.nxos_username))
+print("nxos_password: {}".format(vault.nxos_password))
+print("netbox_token: {}".format(vault.netbox_token))
+print("netbox_url: {}".format(vault.netbox_url))

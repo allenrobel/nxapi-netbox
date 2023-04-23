@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 Name: vpc_status.py
 Description: NXAPI: display vpc parameters
 
@@ -33,13 +33,14 @@ Example output:
 192.168.11.105  cvd-1314-leaf       : num vpcs:                  2
 --
 % 
-'''
+"""
 our_version = 101
-script_name = 'vpc_status'
+script_name = "vpc_status"
 
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+
 # local libraries
 from nxapi_netbox.args.args_cookie import ArgsCookie
 from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
@@ -48,24 +49,32 @@ from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
 from nxapi_netbox.vault.vault import get_vault
 from nxapi_netbox.nxapi.nxapi_vpc import NxapiVpcStatus
 
+
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: NXAPI: display vpc parameters',
-        parents=[ArgsCookie, ArgsNxapiTools])
-    default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
-    mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
+        description="DESCRIPTION: NXAPI: display vpc parameters",
+        parents=[ArgsCookie, ArgsNxapiTools],
+    )
+    default = parser.add_argument_group(title="DEFAULT SCRIPT ARGS")
+    mandatory = parser.add_argument_group(title="MANDATORY SCRIPT ARGS")
 
-    parser.add_argument('--version',
-                        action='version',
-                        version='{} v{}'.format('%(prog)s', our_version))
+    parser.add_argument(
+        "--version", action="version", version="{} v{}".format("%(prog)s", our_version)
+    )
     return parser.parse_args()
+
 
 def get_device_list():
     try:
-        return cfg.devices.split(',')
+        return cfg.devices.split(",")
     except:
-        log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
+        log.error(
+            "exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2".format(
+                cfg.devices
+            )
+        )
         exit(1)
+
 
 def print_output(futures):
     for future in futures:
@@ -75,23 +84,41 @@ def print_output(futures):
         for line in output:
             print(line)
 
+
 def get_output(ip, nx):
     lines = list()
-    prefix = '{:<15} {:<20}:'.format(ip, nx.hostname)
-    lines.append('{} peer status:               {}'.format(prefix, nx.peer_status))
-    lines.append('{} peer status reason:        {}'.format(prefix, nx.peer_status_reason))
-    lines.append('{} peer keepalive status:     {}'.format(prefix, nx.peer_keepalive_status))
-    lines.append('{} peer consistency:          {}'.format(prefix, nx.peer_consistency))
-    lines.append('{} peer consistency status:   {}'.format(prefix, nx.peer_consistency_status))
-    lines.append('{} per vlan peer consistency: {}'.format(prefix, nx.per_vlan_peer_consistency))
-    lines.append('{} type 2 consistency:        {}'.format(prefix, nx.type_2_consistency))
-    lines.append('{} type 2 consistency status: {}'.format(prefix, nx.type_2_consistency_status))
-    lines.append('{} role:                      {}'.format(prefix, nx.role))
-    lines.append('{} delay restore:             {}'.format(prefix, nx.delay_restore_status))
-    lines.append('{} delay restore svi:         {}'.format(prefix, nx.delay_restore_svi_status))
-    lines.append('{} num vpcs:                  {}'.format(prefix, nx.num_of_vpcs))
-    lines.append('--')
+    prefix = "{:<15} {:<20}:".format(ip, nx.hostname)
+    lines.append("{} peer status:               {}".format(prefix, nx.peer_status))
+    lines.append(
+        "{} peer status reason:        {}".format(prefix, nx.peer_status_reason)
+    )
+    lines.append(
+        "{} peer keepalive status:     {}".format(prefix, nx.peer_keepalive_status)
+    )
+    lines.append("{} peer consistency:          {}".format(prefix, nx.peer_consistency))
+    lines.append(
+        "{} peer consistency status:   {}".format(prefix, nx.peer_consistency_status)
+    )
+    lines.append(
+        "{} per vlan peer consistency: {}".format(prefix, nx.per_vlan_peer_consistency)
+    )
+    lines.append(
+        "{} type 2 consistency:        {}".format(prefix, nx.type_2_consistency)
+    )
+    lines.append(
+        "{} type 2 consistency status: {}".format(prefix, nx.type_2_consistency_status)
+    )
+    lines.append("{} role:                      {}".format(prefix, nx.role))
+    lines.append(
+        "{} delay restore:             {}".format(prefix, nx.delay_restore_status)
+    )
+    lines.append(
+        "{} delay restore svi:         {}".format(prefix, nx.delay_restore_svi_status)
+    )
+    lines.append("{} num vpcs:                  {}".format(prefix, nx.num_of_vpcs))
+    lines.append("--")
     return lines
+
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -99,12 +126,13 @@ def worker(device, vault):
     nx.nxapi_init(cfg)
     nx.refresh()
     if nx.error_reason != None:
-        log.error('{} {} error: {}'.format(ip, nx.hostname, nx.error_reason))
+        log.error("{} {} error: {}".format(ip, nx.hostname, nx.error_reason))
         return
     return get_output(ip, nx)
 
+
 cfg = get_parser()
-log = get_logger(script_name, cfg.loglevel, 'DEBUG')
+log = get_logger(script_name, cfg.loglevel, "DEBUG")
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)

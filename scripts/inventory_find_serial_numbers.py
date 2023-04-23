@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 Name: inventory_find_serial_numbers.py
 Description: NXAPI: find one or more serial numbers across a set of NXOS switches
 
@@ -14,13 +14,14 @@ ip              hostname             serial       name            product_id    
 
 % 
 
-'''
+"""
 our_version = 112
-script_name = 'inventory_find_serial_numbers'
+script_name = "inventory_find_serial_numbers"
 
-#standard libraries
+# standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+
 # local libraries
 from nxapi_netbox.args.args_cookie import ArgsCookie
 from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
@@ -29,41 +30,56 @@ from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
 from nxapi_netbox.vault.vault import get_vault
 from nxapi_netbox.nxapi.nxapi_inventory import NxapiInventory
 
+
 def get_parser():
-    help_serials = 'a comma-separated list (no spaces) of Nexus serial numbers'
-    ex_prefix = 'Example:'
-    ex_serials = '{} --serials SAL2222U92Z,FOC321017XA,FOC543217XA'.format(ex_prefix)
+    help_serials = "a comma-separated list (no spaces) of Nexus serial numbers"
+    ex_prefix = "Example:"
+    ex_serials = "{} --serials SAL2222U92Z,FOC321017XA,FOC543217XA".format(ex_prefix)
 
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: NXAPI: find one or more serial numbers across a set of NXOS switches.',
-        parents=[ArgsCookie, ArgsNxapiTools])
+        description="DESCRIPTION: NXAPI: find one or more serial numbers across a set of NXOS switches.",
+        parents=[ArgsCookie, ArgsNxapiTools],
+    )
 
-    mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
-    default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
+    mandatory = parser.add_argument_group(title="MANDATORY SCRIPT ARGS")
+    default = parser.add_argument_group(title="DEFAULT SCRIPT ARGS")
 
-    mandatory.add_argument('--serials',
-                        dest='serials',
-                        required=True,
-                        help='(default: %(default)s) ' + help_serials + ex_serials,
-                        )
+    mandatory.add_argument(
+        "--serials",
+        dest="serials",
+        required=True,
+        help="(default: %(default)s) " + help_serials + ex_serials,
+    )
 
-    parser.add_argument('--version',
-                        action='version',
-                        version='%(prog)s ' + str(our_version))
+    parser.add_argument(
+        "--version", action="version", version="%(prog)s " + str(our_version)
+    )
     return parser.parse_args()
+
 
 def get_device_list():
     try:
-        return cfg.devices.split(',')
+        return cfg.devices.split(",")
     except:
-        log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
+        log.error(
+            "exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2".format(
+                cfg.devices
+            )
+        )
         exit(1)
+
+
 def get_serial_number_list():
     try:
-        return cfg.serials.split(',')
+        return cfg.serials.split(",")
     except:
-        log.error('exiting. Cannot parse --serials {}.  Example usage: --serials SAL2232U92Z,FOC321617XA,FOC631317XA'.format(cfg.serials))
+        log.error(
+            "exiting. Cannot parse --serials {}.  Example usage: --serials SAL2232U92Z,FOC321617XA,FOC631317XA".format(
+                cfg.serials
+            )
+        )
         exit(1)
+
 
 def print_output(futures):
     for future in futures:
@@ -75,14 +91,10 @@ def print_output(futures):
         if len(output) > 0:
             print()
 
+
 def print_header():
-    print(fmt.format(
-        'ip',
-        'hostname',
-        'serial',
-        'name',
-        'product_id',
-        'description'))
+    print(fmt.format("ip", "hostname", "serial", "name", "product_id", "description"))
+
 
 def collect_output(ip, nx):
     lines = list()
@@ -90,14 +102,11 @@ def collect_output(ip, nx):
         nx.item = item
         if nx.serialnum not in serial_numbers:
             continue
-        lines.append(fmt.format(
-            ip,
-            nx.hostname,
-            nx.serialnum,
-            nx.name,
-            nx.productid,
-            nx.desc))
+        lines.append(
+            fmt.format(ip, nx.hostname, nx.serialnum, nx.name, nx.productid, nx.desc)
+        )
     return lines
+
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -106,8 +115,9 @@ def worker(device, vault):
     nx.refresh()
     return collect_output(ip, nx)
 
+
 cfg = get_parser()
-log = get_logger(script_name, cfg.loglevel, 'DEBUG')
+log = get_logger(script_name, cfg.loglevel, "DEBUG")
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
@@ -115,7 +125,7 @@ nb = netbox(vault)
 devices = get_device_list()
 serial_numbers = get_serial_number_list()
 
-fmt = '{:<15} {:<20} {:<12} {:<15} {:<16} {:<30}'
+fmt = "{:<15} {:<20} {:<12} {:<15} {:<16} {:<30}"
 print_header()
 
 executor = ThreadPoolExecutor(max_workers=len(devices))

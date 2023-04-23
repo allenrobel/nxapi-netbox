@@ -3,11 +3,8 @@
 """
 Name: util.py
 Contributors:
-   Allen Robel (arobel@cisco.com) - original code
-   Stefaan Lippen (for fname() fcaller() @ http://stefaanlippens.net/python_inspect)
-   Arron Hall (merge_dicts()) @ https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression#26853961
 
-Summary: Utility classes and methods for for dssperf scripts.
+Summary: Utility classes and methods for scripts in the nxapi-netbox repo.
 
 Detail: TODO: Fill this in for each function added to this library
 
@@ -26,46 +23,48 @@ Usage:
                # Normally placed at the end of a script, or as part of an abort handler
 
 """
-our_version = 141
-# standard libraries
+OUR_VERSION = 141
+
 import time  # localtime(), strftime()
 from collections import deque
-import inspect # inspect.stack()
-import json    # read_json()
+import inspect  # inspect.stack()
+import json  # read_json()
 import os
 import re
 import random, string
 import sys
+
 # local libraruies
-from nxapi_netbox.general.verify_types import VerifyTypes # Timer()
+from nxapi_netbox.general.verify_types import VerifyTypes  # Timer()
 
 
 class NxTimer(object):
-    '''NX-OS timer conversions'''
-    def __init__(self,timer='0:0:0'):
-       self.timer = timer
-       self.timer2sec = 0.0
-       self.seconds = 0.0
-       self.minutes = 0.0
-       self.hours   = 0.0
-       self.days    = 0.0
-       self.weeks   = 0.0
-       self.unit2sec = dict()
-       self.unit2sec['s'] = 1.0
-       self.unit2sec['m'] = self.unit2sec['s'] * 60.0
-       self.unit2sec['h'] = self.unit2sec['m'] * 60.0
-       self.unit2sec['d'] = self.unit2sec['h'] * 24.0
-       self.unit2sec['w'] = self.unit2sec['d'] * 7.0
-       self.unit2sec['M'] = self.unit2sec['w'] * 4.0
- 
-       # seconds.milliseconds e.g. 9.1232
-       self.re_sms = re.compile('^.*?(\d+)\.(\d+).*?$')
-       #                               10:5:23
-       self.re_hms = re.compile('^.*?(\d+):(\d+):(\d+).*?$')
-       #                                6d12h
-       self.re_dh  = re.compile('^.*?(\d+)d(\d+)h.*?$')
-       #                   1w0d
-       self.re_wd  = re.compile('^.*?(\d+)w(\d+)d.*?$')
+    """NX-OS timer conversions"""
+
+    def __init__(self, timer="0:0:0"):
+        self.timer = timer
+        self.timer2sec = 0.0
+        self.seconds = 0.0
+        self.minutes = 0.0
+        self.hours = 0.0
+        self.days = 0.0
+        self.weeks = 0.0
+        self.unit2sec = dict()
+        self.unit2sec["s"] = 1.0
+        self.unit2sec["m"] = self.unit2sec["s"] * 60.0
+        self.unit2sec["h"] = self.unit2sec["m"] * 60.0
+        self.unit2sec["d"] = self.unit2sec["h"] * 24.0
+        self.unit2sec["w"] = self.unit2sec["d"] * 7.0
+        self.unit2sec["M"] = self.unit2sec["w"] * 4.0
+
+        # seconds.milliseconds e.g. 9.1232
+        self.re_sms = re.compile("^.*?(\d+)\.(\d+).*?$")
+        #                               10:5:23
+        self.re_hms = re.compile("^.*?(\d+):(\d+):(\d+).*?$")
+        #                                6d12h
+        self.re_dh = re.compile("^.*?(\d+)d(\d+)h.*?$")
+        #                   1w0d
+        self.re_wd = re.compile("^.*?(\d+)w(\d+)d.*?$")
 
     # not using in this Class  This returns the product of a list
     def prod_seq(seq):
@@ -76,110 +75,116 @@ class NxTimer(object):
             prod *= seq.pop()
         return prod
 
-    def refresh(self,timer):
+    def refresh(self, timer):
 
-       m_sms = self.re_sms.search(timer)
-       if m_sms:
-           self.timer2sec = 0.0
-           self.seconds = float(m_sms.group(1))
-           self.milliseconds = float(m_sms.group(2))
-           self.timer2sec = float('{}.{}'.format(m_sms.group(1),m_sms.group(2)))
-           return
-       m_hms = self.re_hms.search(timer)
-       if m_hms:
-           self.timer2sec = 0.0
-           self.weeks   = 0.0
-           self.days    = 0.0
-           self.hours   = float(m_hms.group(1))
-           self.minutes = float(m_hms.group(2))
-           self.seconds = float(m_hms.group(3))
-           self.timer2sec += self.hours   * self.unit2sec['h']
-           self.timer2sec += self.minutes * self.unit2sec['m']
-           self.timer2sec += self.seconds * self.unit2sec['s']
-           return
-       m_dh = self.re_dh.search(timer)
-       if m_dh:
-           self.timer2sec = 0.0
-           self.days = float(m_dh.group(1))
-           self.hours = float(m_dh.group(2))
-           self.timer2sec += self.days  * self.unit2sec['d']
-           self.timer2sec += self.hours * self.unit2sec['h']
-       m_wd = self.re_wd.search(timer)
-       if m_wd:
-           self.timer2sec = 0.0
-           self.weeks = float(m_wd.group(1))
-           self.days  = float(m_wd.group(2))
-           self.timer2sec += self.weeks * self.unit2sec['w']
-           self.timer2sec += self.days  * self.unit2sec['d']
-       
+        m_sms = self.re_sms.search(timer)
+        if m_sms:
+            self.timer2sec = 0.0
+            self.seconds = float(m_sms.group(1))
+            self.milliseconds = float(m_sms.group(2))
+            self.timer2sec = float("{}.{}".format(m_sms.group(1), m_sms.group(2)))
+            return
+        m_hms = self.re_hms.search(timer)
+        if m_hms:
+            self.timer2sec = 0.0
+            self.weeks = 0.0
+            self.days = 0.0
+            self.hours = float(m_hms.group(1))
+            self.minutes = float(m_hms.group(2))
+            self.seconds = float(m_hms.group(3))
+            self.timer2sec += self.hours * self.unit2sec["h"]
+            self.timer2sec += self.minutes * self.unit2sec["m"]
+            self.timer2sec += self.seconds * self.unit2sec["s"]
+            return
+        m_dh = self.re_dh.search(timer)
+        if m_dh:
+            self.timer2sec = 0.0
+            self.days = float(m_dh.group(1))
+            self.hours = float(m_dh.group(2))
+            self.timer2sec += self.days * self.unit2sec["d"]
+            self.timer2sec += self.hours * self.unit2sec["h"]
+        m_wd = self.re_wd.search(timer)
+        if m_wd:
+            self.timer2sec = 0.0
+            self.weeks = float(m_wd.group(1))
+            self.days = float(m_wd.group(2))
+            self.timer2sec += self.weeks * self.unit2sec["w"]
+            self.timer2sec += self.days * self.unit2sec["d"]
+
+
 class Timer(object):
-    '''Timer which tracks last/min/max/avg/total elapsed time between start() and stop() calls
+    """Timer which tracks last/min/max/avg/total elapsed time between start() and stop() calls
 
-      Takes two arguments:
+    Takes two arguments:
 
-      1. log instance - mandatory
-      2. the queue length for the last N samples.  Optional. Default is 10 samples.
+    1. log instance - mandatory
+    2. the queue length for the last N samples.  Optional. Default is 10 samples.
 
-      Synopsis:
+    Synopsis:
 
-      script_name = 'myscript'
-      console_log_level = 'INFO'
-      file_log_level = 'DEBUG'
-      log = get_logger(script_name, console_log_level, file_log_level)
+    script_name = 'myscript'
+    console_log_level = 'INFO'
+    file_log_level = 'DEBUG'
+    log = get_logger(script_name, console_log_level, file_log_level)
 
-      Example 1:
+    Example 1:
 
-      t = Timer(log)
-      t.start()
-      time.sleep(4)
-      t.stop()
-      print('{} elapsed time'.format(t.elapsed))
+    t = Timer(log)
+    t.start()
+    time.sleep(4)
+    t.stop()
+    print('{} elapsed time'.format(t.elapsed))
 
-      Example 2:
+    Example 2:
 
-      t = Timer(log, 15)
-      t.start()
-      time.sleep(5)
-      t.stop()
-      t.start()
-      time.sleep(18)
-      t.stop()
-      print("last sample {} average duration {} max duration {} sum of all durations {}".format(t.last,
-                                                                                                 t.avg,
-                                                                                                 t.max,
-                                                                                                 t.elapsed)
-      print("Clearing all timer state and statistics")
-      t.clear()
+    t = Timer(log, 15)
+    t.start()
+    time.sleep(5)
+    t.stop()
+    t.start()
+    time.sleep(18)
+    t.stop()
+    print("last sample {} average duration {} max duration {} sum of all durations {}".format(t.last,
+                                                                                               t.avg,
+                                                                                               t.max,
+                                                                                               t.elapsed)
+    print("Clearing all timer state and statistics")
+    t.clear()
 
-    '''
-    def __init__(self,log, qlen=10):
+    """
+
+    def __init__(self, log, qlen=10):
         self.lib_name = "Timer"
-        self.lib_version = our_version
-        self.log_prefix = '{}_{}'.format(self.lib_name, self.lib_version)
+        self.lib_version = OUR_VERSION
+        self.log_prefix = "{}_{}".format(self.lib_name, self.lib_version)
         self.log = log
         self.verify = VerifyTypes(self.log)
 
         if not self.verify.is_int(qlen):
-            self.log.warning("invalid timer sample queue length {}.  Setting to default 10".format(qlen))
+            self.log.warning(
+                "invalid timer sample queue length {}.  Setting to default 10".format(
+                    qlen
+                )
+            )
             qlen = 10
 
-
-        self.qlen         = int(qlen)
-        self._running     = False
-        self.time_start   = 0.0
+        self.qlen = int(qlen)
+        self._running = False
+        self.time_start = 0.0
         # duration between lastest start/stop interval
-        self.time_last    = 0.0
-        self.time_total   = 0.0
+        self.time_last = 0.0
+        self.time_total = 0.0
         # total of all time between start/stop intervals
         self.time_elapsed = 0.0
-        self.time_max     = 0.0
-        self.time_min     = 9999999990.0
-        self.time_avg     = 0.0
+        self.time_max = 0.0
+        self.time_min = 9999999990.0
+        self.time_avg = 0.0
         self.q = deque(maxlen=self.qlen)
 
     @property
     def running(self):
         return self._running
+
     @running.setter
     def running(self, _x):
         if not self.verify.is_boolean(_x):
@@ -196,7 +201,7 @@ class Timer(object):
         if not self._running:
             return
         self.running = False
-        self.time_last = (time.time() - self.time_start)
+        self.time_last = time.time() - self.time_start
         self.q.append(self.time_last)
         # q will be at least 1 at this point so below is safe
         self.time_avg = sum(self.q) / len(self.q)
@@ -210,81 +215,57 @@ class Timer(object):
     @property
     def total(self):
         return self.time_total
+
     @property
     def elapsed(self):
-        '''
+        """
         the time period between each start() and stop() call
-        '''
+        """
         return self.time_elapsed
+
     @property
     def max(self):
-        '''
+        """
         the maximum elapsed time seen since the timer was created or cleared
-        '''
+        """
         return self.time_max
+
     @property
     def min(self):
-        '''
+        """
         the minimum elapsed time seen since the timer was created or cleared
-        '''
+        """
         return self.time_min
+
     @property
     def avg(self):
-        '''
+        """
         the average elapsed time seen since the timer was created or cleared
         this is a rolling average, averaged over the entries in the q
-        '''
+        """
         return self.time_avg
+
     @property
     def last(self):
-        '''
+        """
         the last elapsed time between start() and stop() calls
-        '''
+        """
         return self.time_last
+
     def clear(self):
-        self.time_start   = 0.0
+        self.time_start = 0.0
         self.time_elapsed = 0.0
-        self.time_last    = 0.0
-        self.time_avg     = 0.0
-        self.time_min     = 9999999.0
+        self.time_last = 0.0
+        self.time_avg = 0.0
+        self.time_min = 9999999.0
         self.q.clear()
-
-class Constants(object):
-    '''Provides constants for common values e.g. na_bool, na_str, na_int
-
-      na_bool - if False, then the value is not applicable i.e. invalid
-                if True, the value is valid
-      na_str  - if 'na', then the value is not applicable i.e. invalid
-                if any other string, the value is valid
-      na_int  - if -1, then the value is not applicable i.e. invalid
-                if any other integer, the value is valid
-      HEX_DIGITS - compare a string as follows
-                   from util import Constants
-                   my_string = 'ea3f'
-                   c = Constants()
-                   c.HEX_DIGITS.issuperset(my_string)
-                      True <<<<<
-                   my_string = 'z8r8'
-                   c.HEX_DIGITS.issuperset(my_string)
-                      False <<<<<
-
-    '''
-    def __init__(self,level="INFO"):
-        self.na_bool = False
-        self.na_str  = 'na'
-        self.na_int  = -1
-        self.HEX_DIGITS = frozenset('0123456789ABCDEFabcdef')
-    def is_hex(self,_value):
-        if self.HEX_DIGITS.issuperset(_value):
-            return True
-        else:
-            return False
 
 # functions
 
+
 def ranges(ints):
-    '''
-    generator which, given a list of integers, yields tuples comprising 
+    """
+    generator which, given a list of integers, yields tuples comprising
     the start and end of each contiguous range within the list
 
     For example, when called with the following list:
@@ -297,7 +278,7 @@ def ranges(ints):
     (4, 5)
     (7, 10)
     (39, 39)
-    '''
+    """
     ints = sorted(set(ints))
     range_start = previous_number = ints[0]
     for number in ints[1:]:
@@ -308,8 +289,9 @@ def ranges(ints):
             range_start = previous_number = number
     yield range_start, previous_number
 
-def split_list(l,n):
-    '''
+
+def split_list(l, n):
+    """
     splits list l into n sublists.
     The number of elements in l must be evenly divisible by n (we don't error check anything)
 
@@ -319,8 +301,9 @@ def split_list(l,n):
         list2 = split_list(list1,2)
 
         list2 is now [[1,2],[3,4]]
-    '''
-    return [l[i:i+n] for i in range(0, len(l), n)]
+    """
+    return [l[i : i + n] for i in range(0, len(l), n)]
+
 
 # if sys.version < '3':
 #     def b(x):
@@ -330,8 +313,9 @@ def split_list(l,n):
 #     def b(x):
 #         return codecs.latin_1_encode(x)[0]
 
+
 def list2options(l):
-    '''
+    """
     Convenience method to present items in a list as choices in standard [item1 | item2 | item3] format.
 
     Usage:
@@ -342,35 +326,39 @@ def list2options(l):
     Will print the following:
 
     Your choices are [choice1 | choice2 | choice3]
-    '''
-    return '[%s]' % ' | '.join(item for item in l)
+    """
+    return "[%s]" % " | ".join(item for item in l)
 
 
 def fname():
-    '''
+    """
     Return the name of the currently executing function from within that function
 
     Usage:
        def foo():
            print('{} some comment').format(fname())
-    '''
+    """
     return inspect.stack()[1][3]
 
+
 def fcaller():
-    '''
+    """
     Return the name of the calling function
-    '''
+    """
     return inspect.stack()[2][3]
+
 
 def file_exists(fn):
     if os.path.exists(fn):
         return True
     return False
 
+
 def is_file(fn):
     if os.path.isfile(fn):
         return True
     return False
+
 
 def sanity_check_file(fn):
     if not file_exists(fn):
@@ -380,27 +368,20 @@ def sanity_check_file(fn):
         print("Exiting. Is not a file: {}".format(fn))
         exit(1)
 
-# def get_cfg_from_file(fn):
-#     '''
-#     DEPRECATED: Use file2list() instead
-#     Given a file, fn, return lines in fn as a list with one line per list element.
-#     '''
-#     sanity_check_file(fn)
-#     cfg = open(fn).read().splitlines()
-#     return cfg
 
 def read_json(fn):
     sanity_check_file(fn)
     try:
-        with open(fn, 'r') as fh:
+        with open(fn, "r") as fh:
             _json = json.load(fh)
     except:
-        print('Exiting. Unable to load file {}'.format(fn))
+        print("Exiting. Unable to load file {}".format(fn))
         exit(1)
     return _json
 
-def file2list(fn,clean=False):
-    '''
+
+def file2list(fn, clean=False):
+    """
     Given a file, fn, return lines in fn as a list with one line per list element.  Sanity-checking is done to make sure fn exists and is a file.
 
     Arguments:
@@ -417,18 +398,19 @@ def file2list(fn,clean=False):
             same as previous example
         my_list = file2list(my_file, clean=True)
             my_list will contain only lines from my_file that don't contain comments and are not blank
-    '''
+    """
     sanity_check_file(fn)
     cfg = open(fn).read().splitlines()
     if clean is False:
         return cfg
-    rc_comment = re.compile('^\s*#')
-    rc_blank   = re.compile('^\s*$')
+    rc_comment = re.compile("^\s*#")
+    rc_blank = re.compile("^\s*$")
     cleaned = []
     for line in cfg:
         if not rc_blank.search(line) and not rc_comment.match(line):
             cleaned.append(line)
     return cleaned
+
 
 # def get_duts_from_file(fn):
 #     '''
@@ -454,8 +436,10 @@ def file2list(fn,clean=False):
 #         dutlist = re.split(",", str(dut))
 #     return dutlist
 
+
 def timestamp():
     return time.strftime("%Y%m%d_%H:%M:%S", time.localtime())
+
 
 # class Echo:
 #     def __init__(self,verbose=False):
@@ -499,11 +483,12 @@ def timestamp():
 #             print("{}".format(item))
 #         print("-------------------------------------------------------------------------")
 
+
 def counter(start=0, step=1):
-    '''Increment each time called.
+    """Increment each time called.
 
     Usage:
-     
+
        c = counter()
        print c() - prints 1
        print c() - prints 2
@@ -515,12 +500,15 @@ def counter(start=0, step=1):
       print c() - prints 8
       print c() - prints 12
       etc
-    '''
+    """
     x = [start]
+
     def _inc():
         x[0] += step
         return x[0]
+
     return _inc
+
 
 def merge_dicts(*dict_args):
     """
@@ -533,15 +521,17 @@ def merge_dicts(*dict_args):
         result.update(d)
     return result
 
+
 def randomword(length):
-    rand = ''.join(random.choice(string.ascii_lowercase) for i in range(length))
-    rand += ''.join(random.choice(string.ascii_uppercase) for i in range(length))
-    rand += ''.join(random.choice(string.digits) for i in range(length))
-    rand += ''.join(random.choice(string.punctuation) for i in range(length))
-    return ''.join(random.choice(rand) for i in range(length))
+    rand = "".join(random.choice(string.ascii_lowercase) for i in range(length))
+    rand += "".join(random.choice(string.ascii_uppercase) for i in range(length))
+    rand += "".join(random.choice(string.digits) for i in range(length))
+    rand += "".join(random.choice(string.punctuation) for i in range(length))
+    return "".join(random.choice(rand) for i in range(length))
+
 
 class ZippedIterator(object):
-    '''
+    """
     zip() n list() and iterate over the result.
 
     return type: iterator which yields tuple()
@@ -581,11 +571,12 @@ class ZippedIterator(object):
     (2, 5, 8, 11)
     (3, 6, 9, 12)
 
-    '''
+    """
+
     def __init__(self, T):
         for L in T:
             if type(L) != type(list()) and type(L) != type(tuple()):
-                print('exiting. expected list() or tuple().  Got {}'.format(L))
+                print("exiting. expected list() or tuple().  Got {}".format(L))
         self.zipped = zip(*T)
 
     @property
@@ -596,8 +587,9 @@ class ZippedIterator(object):
             except Exception as e:
                 break
 
+
 class NestedIterator(object):
-    '''
+    """
     nested iteration over two list()
     return type: iterator which yields tuple()
 
@@ -626,7 +618,7 @@ class NestedIterator(object):
             print(next(i))
         except:
             break
-    
+
     Output
 
     [1, 1]
@@ -638,19 +630,21 @@ class NestedIterator(object):
     [2, 3]
     [2, 4]
 
-    '''
+    """
+
     def __init__(self, A, B):
         if type(A) != type(list()) and type(A) != type(tuple()):
-            print('exiting. expected list() or tuple() for A.  Got {}').format(A)
+            print("exiting. expected list() or tuple() for A.  Got {}").format(A)
         if type(B) != type(list()) and type(B) != type(tuple()):
-            print('exiting. expected list() or tuple() for B.  Got {}').format(B)
+            print("exiting. expected list() or tuple() for B.  Got {}").format(B)
         self._A = A
         self._B = B
 
         def _get():
             for a in A:
                 for b in B:
-                    yield((a,b))
+                    yield ((a, b))
+
         self.i = _get()
 
     @property

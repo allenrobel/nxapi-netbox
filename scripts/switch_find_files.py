@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 Name: switch_find_files.py
 Description: NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices
 
@@ -35,13 +35,14 @@ Target: bootflash:/
 --------------------------------------------------
 % 
 
-'''
+"""
 our_version = 107
-script_name = 'switch_find_files'
+script_name = "switch_find_files"
 
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+
 # local libraries
 from nxapi_netbox.args.args_cookie import ArgsCookie
 from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
@@ -50,42 +51,51 @@ from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
 from nxapi_netbox.vault.vault import get_vault
 from nxapi_netbox.nxapi.nxapi_dir import NxapiDir
 
+
 def get_parser():
-    ex_prefix = 'Example: '
-    help_target = 'If specified, issue dir <target>.  Else, issue dir bootflash:/'
-    help_find = 'Find all files whose name includes the specified string.'
-    ex_target = '{} --target bootflash:'.format(ex_prefix)
-    ex_find = '{} --find log'.format(ex_prefix)
+    ex_prefix = "Example: "
+    help_target = "If specified, issue dir <target>.  Else, issue dir bootflash:/"
+    help_find = "Find all files whose name includes the specified string."
+    ex_target = "{} --target bootflash:".format(ex_prefix)
+    ex_find = "{} --find log".format(ex_prefix)
 
-    title = 'NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices'
+    title = "NXAPI: find files whose name contains --find <string> on --target across the set of switches --devices"
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: {}'.format(title),
-        parents=[ArgsCookie, ArgsNxapiTools])
-    mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
-    default   = parser.add_argument_group(title='DEFAULT SCRIPT ARGS')
+        description="DESCRIPTION: {}".format(title),
+        parents=[ArgsCookie, ArgsNxapiTools],
+    )
+    mandatory = parser.add_argument_group(title="MANDATORY SCRIPT ARGS")
+    default = parser.add_argument_group(title="DEFAULT SCRIPT ARGS")
 
-    mandatory.add_argument('--target',
-                        dest='target',
-                        required=False,
-                        default='bootflash:/',
-                        help='{} {}'.format(help_target, ex_target))
+    mandatory.add_argument(
+        "--target",
+        dest="target",
+        required=False,
+        default="bootflash:/",
+        help="{} {}".format(help_target, ex_target),
+    )
 
-    mandatory.add_argument('--find',
-                        dest='find',
-                        required=True,
-                        help='{} {}'.format(help_find, ex_find))
+    mandatory.add_argument(
+        "--find", dest="find", required=True, help="{} {}".format(help_find, ex_find)
+    )
 
-    parser.add_argument('--version',
-                        action='version',
-                        version='{} v{}'.format('%(prog)s', our_version))
+    parser.add_argument(
+        "--version", action="version", version="{} v{}".format("%(prog)s", our_version)
+    )
     return parser.parse_args()
+
 
 def get_device_list():
     try:
-        return cfg.devices.split(',')
+        return cfg.devices.split(",")
     except:
-        log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
+        log.error(
+            "exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2".format(
+                cfg.devices
+            )
+        )
         exit(1)
+
 
 def print_output(futures):
     for future in futures:
@@ -95,6 +105,7 @@ def print_output(futures):
         for line in output:
             print(line)
 
+
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
     d = NxapiDir(vault.nxos_username, vault.nxos_password, ip, log)
@@ -103,29 +114,34 @@ def worker(device, vault):
     d.refresh()
 
     lines = list()
-    lines.append('{} - {}'.format(ip, d.hostname))
-    lines.append('Target: {}'.format(d.target))
-    lines.append(fmt.format('filename', 'size', 'date'))
+    lines.append("{} - {}".format(ip, d.hostname))
+    lines.append("Target: {}".format(d.target))
+    lines.append(fmt.format("filename", "size", "date"))
     for key in d.files:
-        if cfg.find not in d.files[key]['fname']:
+        if cfg.find not in d.files[key]["fname"]:
             continue
-        lines.append(fmt.format(d.files[key]['fname'], d.files[key]['fsize'], d.files[key]['timestring']))
+        lines.append(
+            fmt.format(
+                d.files[key]["fname"], d.files[key]["fsize"], d.files[key]["timestring"]
+            )
+        )
     if len(lines) != 0:
         lines.append(separator)
     return lines
 
-separator = '-' * 50
+
+separator = "-" * 50
 print(separator)
 
 cfg = get_parser()
-log = get_logger(script_name, cfg.loglevel, 'DEBUG')
+log = get_logger(script_name, cfg.loglevel, "DEBUG")
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
 
 devices = get_device_list()
 
-fmt = '    {:<30} {:>12} {:<20}'
+fmt = "    {:<30} {:>12} {:<20}"
 
 executor = ThreadPoolExecutor(max_workers=len(devices))
 futures = list()

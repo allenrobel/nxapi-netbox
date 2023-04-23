@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 Name: interface_last_flapped.py
 Description: NXAPI: display interface last flapped/cleared timers, and reset info
 
@@ -20,9 +20,9 @@ ip              hostname           interface       state   admin   flapped   cle
 192.168.11.103  cvd-1312-leaf      Ethernet1/52    up      up      151200.0  151200.0  4     
 
 % 
-'''
+"""
 our_version = 106
-script_name = 'interface_last_flapped'
+script_name = "interface_last_flapped"
 
 # standard libraries
 import argparse
@@ -37,46 +37,69 @@ from nxapi_netbox.vault.vault import get_vault
 from nxapi_netbox.nxapi.nxapi_interface import NxapiInterface
 from nxapi_netbox.nxapi.nxapi_interface import NxapiInterfaceStatus
 
+
 def get_parser():
-    help_interface = 'If present, interface to monitor.  If not present, all interfaces will be monitored.'
-    ex_interface = 'Example: --interface Eth1/1'
+    help_interface = "If present, interface to monitor.  If not present, all interfaces will be monitored."
+    ex_interface = "Example: --interface Eth1/1"
 
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: NXAPI: display interface last flapped/cleared timers, and reset info',
-        parents=[ArgsCookie, ArgsNxapiTools])
-    optional = parser.add_argument_group(title='OPTIONAL SCRIPT ARGS')
-    mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
+        description="DESCRIPTION: NXAPI: display interface last flapped/cleared timers, and reset info",
+        parents=[ArgsCookie, ArgsNxapiTools],
+    )
+    optional = parser.add_argument_group(title="OPTIONAL SCRIPT ARGS")
+    mandatory = parser.add_argument_group(title="MANDATORY SCRIPT ARGS")
 
-    optional.add_argument('--interface',
-                        dest='interface',
-                        required=False,
-                        default=None,
-                        help='{} {}'.format(help_interface, ex_interface))
+    optional.add_argument(
+        "--interface",
+        dest="interface",
+        required=False,
+        default=None,
+        help="{} {}".format(help_interface, ex_interface),
+    )
 
-    parser.add_argument('--version',
-                        action='version',
-                        version='{} v{}'.format('%(prog)s', our_version))
+    parser.add_argument(
+        "--version", action="version", version="{} v{}".format("%(prog)s", our_version)
+    )
     return parser.parse_args()
+
 
 def get_device_list():
     try:
-        return cfg.devices.split(',')
+        return cfg.devices.split(",")
     except:
-        log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
+        log.error(
+            "exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2".format(
+                cfg.devices
+            )
+        )
         exit(1)
 
+
 def get_max_width(d):
-    '''
+    """
     not used
-    '''
+    """
     width = 0
     for key in d:
         if len(key) > width:
             width = len(key)
     return width
 
+
 def print_header():
-    print(fmt.format('ip', 'hostname', 'interface', 'state', 'admin', 'flapped', 'cleared', 'resets'))
+    print(
+        fmt.format(
+            "ip",
+            "hostname",
+            "interface",
+            "state",
+            "admin",
+            "flapped",
+            "cleared",
+            "resets",
+        )
+    )
+
 
 def print_output(futures):
     for future in futures:
@@ -87,6 +110,7 @@ def print_output(futures):
             print(line)
         if len(output) > 0:
             print()
+
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
@@ -103,17 +127,30 @@ def worker(device, vault):
     for interface in s.info:
         i.interface = interface
         i.refresh()
-        lines.append(fmt.format(ip, i.hostname, i.interface, i.state, i.admin_state, i.eth_link_flapped, i.eth_clear_counters, i.eth_reset_cntr))
+        lines.append(
+            fmt.format(
+                ip,
+                i.hostname,
+                i.interface,
+                i.state,
+                i.admin_state,
+                i.eth_link_flapped,
+                i.eth_clear_counters,
+                i.eth_reset_cntr,
+            )
+        )
     return lines
+
+
 cfg = get_parser()
-log = get_logger(script_name, cfg.loglevel, 'DEBUG')
+log = get_logger(script_name, cfg.loglevel, "DEBUG")
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
 
 devices = get_device_list()
 
-fmt = '{:<15} {:<18} {:<15} {:<7} {:<7} {:<9} {:<9} {:<6}'
+fmt = "{:<15} {:<18} {:<15} {:<7} {:<7} {:<9} {:<9} {:<6}"
 print_header()
 
 executor = ThreadPoolExecutor(max_workers=len(devices))

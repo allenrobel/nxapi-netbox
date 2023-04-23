@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 Name: nxapi_forwarding_route_summary_ipv6.py
 Description: NXAPI: display forwarding ipv6 route summary
 
@@ -34,48 +34,61 @@ IP              Hostname                 Value Description
 192.168.11.101  cvd-1311-leaf                1 /127 prefixlen
 192.168.11.101  cvd-1311-leaf                1 /128 prefixlen
 %
-'''
+"""
 our_version = 106
-script_name = 'forwarding_route_summary_ipv6'
+script_name = "forwarding_route_summary_ipv6"
 
 # standard libraries
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-#local libraries
+
+# local libraries
 from nxapi_netbox.args.args_cookie import ArgsCookie
 from nxapi_netbox.args.args_nxapi_tools import ArgsNxapiTools
 from nxapi_netbox.general.log import get_logger
 from nxapi_netbox.general.constants import Constants
 from nxapi_netbox.netbox.netbox_session import netbox, get_device_mgmt_ip
 from nxapi_netbox.vault.vault import get_vault
-from nxapi_netbox.nxapi.nxapi_forwarding_route_summary import NxapiForwardingRouteSummaryIpv6
+from nxapi_netbox.nxapi.nxapi_forwarding_route_summary import (
+    NxapiForwardingRouteSummaryIpv6,
+)
+
 
 def get_parser():
-    help_module = 'module on which to query forwarding ipv6 route summary info'
-    ex_module = ' Example: --module 2'
+    help_module = "module on which to query forwarding ipv6 route summary info"
+    ex_module = " Example: --module 2"
     parser = argparse.ArgumentParser(
-        description='DESCRIPTION: Display forwarding ipv6 route summary via NXAPI',
-        parents=[ArgsCookie,ArgsNxapiTools])
-    optional   = parser.add_argument_group(title='OPTIONAL SCRIPT ARGS')
-    mandatory = parser.add_argument_group(title='MANDATORY SCRIPT ARGS')
+        description="DESCRIPTION: Display forwarding ipv6 route summary via NXAPI",
+        parents=[ArgsCookie, ArgsNxapiTools],
+    )
+    optional = parser.add_argument_group(title="OPTIONAL SCRIPT ARGS")
+    mandatory = parser.add_argument_group(title="MANDATORY SCRIPT ARGS")
 
-    optional.add_argument('--module',
-                        dest='module',
-                        required=False,
-                        default=1,
-                        help='{} {}'.format(help_module, ex_module))
+    optional.add_argument(
+        "--module",
+        dest="module",
+        required=False,
+        default=1,
+        help="{} {}".format(help_module, ex_module),
+    )
 
-    parser.add_argument('--version',
-                        action='version',
-                        version='{} v{}'.format('%(prog)s', our_version))
+    parser.add_argument(
+        "--version", action="version", version="{} v{}".format("%(prog)s", our_version)
+    )
     return parser.parse_args()
+
 
 def get_device_list():
     try:
-        return cfg.devices.split(',')
+        return cfg.devices.split(",")
     except:
-        log.error('exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2'.format(cfg.devices))
+        log.error(
+            "exiting. Cannot parse --devices {}.  Example usage: --devices leaf_1,spine_2,leaf_2".format(
+                cfg.devices
+            )
+        )
         exit(1)
+
 
 def print_output(futures):
     for future in futures:
@@ -85,38 +98,48 @@ def print_output(futures):
         for line in output:
             print(line)
 
+
 def get_header():
-    return fmt.format('IP', 'Hostname', 'Value', 'Description')
+    return fmt.format("IP", "Hostname", "Value", "Description")
+
 
 def collect_output(ip, fib):
     lines = list()
     lines.append(get_header())
-    lines.append(fmt.format(ip, fib.hostname, fib.route_count,   'FIBv6 routes'))
-    lines.append(fmt.format(ip, fib.hostname, fib.path_count,    'FIBv6 paths'))
-    lines.append(fmt.format(ip, fib.hostname, fib.route_updates, 'Route updates'))
-    lines.append(fmt.format(ip, fib.hostname, fib.route_inserts, 'Route inserts'))
-    lines.append(fmt.format(ip, fib.hostname, fib.route_deletes, 'Route deletes'))
+    lines.append(fmt.format(ip, fib.hostname, fib.route_count, "FIBv6 routes"))
+    lines.append(fmt.format(ip, fib.hostname, fib.path_count, "FIBv6 paths"))
+    lines.append(fmt.format(ip, fib.hostname, fib.route_updates, "Route updates"))
+    lines.append(fmt.format(ip, fib.hostname, fib.route_inserts, "Route inserts"))
+    lines.append(fmt.format(ip, fib.hostname, fib.route_deletes, "Route deletes"))
     for prefixlen in range(0, c.ipv6_mask_length + 1):
         fib.mask_length = prefixlen
         if fib.mask_length == -1:
             continue
-        lines.append('{:<15} {:<20} {:>9} /{:<3} {:<9}'.format(ip, fib.hostname, fib.mask_length, prefixlen, 'prefixlen'))
+        lines.append(
+            "{:<15} {:<20} {:>9} /{:<3} {:<9}".format(
+                ip, fib.hostname, fib.mask_length, prefixlen, "prefixlen"
+            )
+        )
     return lines
+
 
 def worker(device, vault):
     ip = get_device_mgmt_ip(nb, device)
-    nx = NxapiForwardingRouteSummaryIpv6(vault.nxos_username, vault.nxos_password, ip, log)
+    nx = NxapiForwardingRouteSummaryIpv6(
+        vault.nxos_username, vault.nxos_password, ip, log
+    )
     nx.nxapi_init(cfg)
     nx.vrf = cfg.vrf
     nx.module = cfg.module
     nx.refresh()
     return collect_output(ip, nx)
 
-fmt = '{:<15} {:<20} {:>9} {:<14}'
 
-c = Constants() # see collect_output()
+fmt = "{:<15} {:<20} {:>9} {:<14}"
+
+c = Constants()  # see collect_output()
 cfg = get_parser()
-log = get_logger(script_name, cfg.loglevel, 'DEBUG')
+log = get_logger(script_name, cfg.loglevel, "DEBUG")
 vault = get_vault(cfg.vault)
 vault.fetch_data()
 nb = netbox(vault)
